@@ -1,0 +1,17 @@
+api==0.0.7
+asgiref
+certifi==2023.7.22
+charset-normalizer==3.2.0
+Django
+djangorestframework==3.14.0
+greenlet
+idna==3.4
+nose==1.3.7
+pydantic
+pytz
+requests==2.31.0
+SQLAlchemy
+sqlparse
+typing_extensions
+tzdata
+urllib3==2.0.4
