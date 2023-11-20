@@ -2,20 +2,26 @@ import hashlib
 import json
 
 from menu.models import Blockchains, Transaction
+from datetime import datetime
 
 
 class Block:
     def __init__(self, data):
         self.data = data
         self.prev_hash = ""
-        self.nonce = 0
         self.hash = ""
+        self.create_at = ""
 
 
 def hash(block):
-    data = json.dumps(block.data) + block.prev_hash + str(block.nonce)
+    data = json.dumps(block.data) + block.prev_hash + block.create_at
     data = data.encode('utf-8')
     # Thay sha256 bang mat ma luong tu
+    return hashlib.sha256(data).hexdigest()
+
+
+def SHA256(data):
+    data = data.encode('utf-8')
     return hashlib.sha256(data).hexdigest()
 
 
@@ -27,23 +33,42 @@ def check_blockchain():
         return False
 
 
-def mine(block_number, transactions, previous_hash, prefix_zeros):
+def check_valid_transaction(data, created_at):
+    results = Transaction.objects.all().values()
+    print(data)
+    for value in results:
+        original_datetime = datetime.strptime(str(value['created_at']), "%Y-%m-%d %H:%M:%S.%f%z")
+        formatted_string = original_datetime.strftime("%Y-%m-%dT%H:%M")
+        print(formatted_string)
+        if data['from_send'] == value['from_send'] and data['destination'] == value['destination'] \
+                and float(data['amount']) == value['amount'] and created_at == formatted_string:
+            return True
+    return False
+
+
+def mine(transactions, prefix_zeros: int, timestamp: str):
     prefix_str = '0' * prefix_zeros
-    block = str(block_number) + transactions + previous_hash + prefix_str
-    while not hash(block).startswith(prefix_str):
-        block.nonce += 1
-        block.hash = hash(block)
+    nonce = 0
+    check_data = check_valid_transaction(transactions, timestamp)
+    if check_data:
+        results = Blockchains.objects.all().values().last()
+        block = json.dumps(transactions) + results['previous_hash'] + str(nonce) + timestamp
+        new_hash = SHA256(block)
+        while not new_hash.startswith(prefix_str):
+            nonce += 1
+            block = json.dumps(transactions) + new_hash + str(nonce) + timestamp
+            new_hash = SHA256(block)
+        return True
+    else:
+        return False
 
 
 class Blockchain:
-    def __init__(self, owner):
-        self.owner = owner
+    def __init__(self):
         self.chain = []
 
     def add_block(self, data):
         block = Block(data)
-        # Lấy prev_hash từ giao dịch trước đó rồi cho vào block.
-        # List blockchain ra rồi lấy hash gần nhất gán cho block.prev_hash
         check = check_blockchain()
         if check:
             results = Blockchains.objects.all().values().last()
@@ -53,7 +78,6 @@ class Blockchain:
 
             self.chain.append(block)
         else:
-            # Thay đổi đoạn này đáng lẽ ra Geneis Block thì previous hash phải là "". Và số nonce phải bằng 0
             block.hash = hash(block)
             block.prev_hash = ""
             self.chain.append(block)
@@ -65,11 +89,9 @@ class Blockchain:
             print("Data:", transaction)
             print("Previous hash:", block.prev_hash)
             print("Hash:", block.hash)
-            print("Nonce:", block.nonce)
             block_data = Blockchains(
                 previous_hash=block.prev_hash,
-                hash_blockchain=block.hash,
-                nonce=block.nonce
+                hash_blockchain=block.hash
             )
             print("DONE: ")
             block_data.save()
@@ -100,7 +122,6 @@ class Blockchain:
                     balance = balance + transfer["amount"]
         return balance
 
-
 # blockchain = Blockchain("Duong")
 # print(blockchain.get_blockchain())
 # blockchain.add_block([
@@ -122,4 +143,3 @@ class Blockchain:
 # print(blockchain.get_balance("Duong"))
 # print('------------------------------------------------------')
 # print(blockchain.get_balance("Yen"))
-
