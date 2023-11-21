@@ -1,18 +1,7 @@
-from pyspplus import random_sign_keypair, sign, verify
+from .pqcrypto.pqcrypto.sign.dilithium4 import generate_keypair, sign, verify
 
-# Tạo cặp khóa
-private_key, public_key = random_sign_keypair()
+public_key, secret_key = generate_keypair()
 
-# Dữ liệu cần ký
-data = b"Hello, World!"
+signature = sign(secret_key, b"Hello world")
 
-# Tạo chữ ký số
-signature = sign(data, private_key)
-
-# Xác minh chữ ký số
-verification_result = verify(data, signature, public_key)
-
-if verification_result:
-    print("Chữ ký số hợp lệ.")
-else:
-    print("Chữ ký số không hợp lệ.")
+assert verify(public_key, b"Hello world", signature)
