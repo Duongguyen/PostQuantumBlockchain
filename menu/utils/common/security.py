@@ -3,6 +3,8 @@ import json
 
 from menu.models import Blockchains, Transaction
 from datetime import datetime
+from pqcrypto.pqcrypto.config import PUBLIC_KEY, SECRET_KEY
+from pqcrypto.pqcrypto.sign.sphincs_sha256_256f_robust import generate_keypair, sign, verify
 
 
 class Block:
@@ -23,6 +25,23 @@ def hash(block):
 def SHA256(data):
     data = data.encode('utf-8')
     return hashlib.sha256(data).hexdigest()
+
+
+# def hash(block):
+#     data = json.dumps(block.data) + block.prev_hash + block.create_at
+#     data = data.encode('utf-8')
+#     secret_key_original = bytes.fromhex(SECRET_KEY)
+#     signature_based = sign(secret_key_original, data)
+#     signature_original = signature_based.hex()
+#     return signature_original
+#
+#
+# def signature(data):
+#     data = data.encode('utf-8')
+#     secret_key_original = bytes.fromhex(SECRET_KEY)
+#     signature_based = sign(secret_key_original, data)
+#     signature_original = signature_based.hex()
+#     return signature_original
 
 
 def check_blockchain():
@@ -46,21 +65,36 @@ def check_valid_transaction(data, created_at):
     return False
 
 
-def mine(transactions, prefix_zeros: int, timestamp: str):
-    prefix_str = '0' * prefix_zeros
-    nonce = 0
+def mine(transactions, timestamp: str):
     check_data = check_valid_transaction(transactions, timestamp)
     if check_data:
         results = Blockchains.objects.all().values().last()
-        block = json.dumps(transactions) + results['previous_hash'] + str(nonce) + timestamp
+        block = json.dumps(transactions) + results['previous_hash'] + str(results['nonce']) + timestamp
         new_hash = SHA256(block)
-        while not new_hash.startswith(prefix_str):
-            nonce += 1
-            block = json.dumps(transactions) + new_hash + str(nonce) + timestamp
+        while not new_hash.startswith(str(results['nonce']) * results['difficulty_target']):
+            results['nonce'] += 1
+            block = json.dumps(transactions) + new_hash + str(results['nonce']) + timestamp
             new_hash = SHA256(block)
-        return True
+
+        if results['header'] == results['nonce']:
+            return True
+
+        return False
     else:
         return False
+
+
+def check_valid_mine(transactions, timestamp: str):
+    check_data = check_valid_transaction(transactions, timestamp)
+    if check_data:
+        results = Blockchains.objects.all().values().last()
+        block = json.dumps(transactions) + timestamp
+        new_hash = SHA256(block)
+        if new_hash.startswith(str(results['nonce']) * results['difficulty_target']):
+            return True
+        return False
+
+    return False
 
 
 class Blockchain:
@@ -70,15 +104,15 @@ class Blockchain:
     def add_block(self, data):
         block = Block(data)
         check = check_blockchain()
+        results = Blockchains.objects.all().values().last()
         if check:
-            results = Blockchains.objects.all().values().last()
             value = results['hash_blockchain']
             block.prev_hash = value
-            block.hash = hash(block)
+            block.hash = str(results['nonce']) * results['difficulty_target'] + hash(block)
 
             self.chain.append(block)
         else:
-            block.hash = hash(block)
+            block.hash = str(results['nonce']) * results['difficulty_target'] + hash(block)
             block.prev_hash = ""
             self.chain.append(block)
 

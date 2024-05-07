@@ -6,6 +6,7 @@ from django.utils import timezone
 
 
 class Transaction(models.Model):
+    header = models.IntegerField(null=False, default=0)
     from_send = models.CharField(max_length=500, null=False)
     destination = models.CharField(max_length=500, null=False)
     amount = models.FloatField(null=False)
@@ -18,9 +19,13 @@ class Transaction(models.Model):
 
 
 class Blockchains(models.Model):
+    version = models.FloatField(null=False, default=4.0)
+    header = models.IntegerField(null=False, default=0)
     previous_hash = models.CharField(max_length=2000, null=True)
     hash_blockchain = models.CharField(max_length=1000, null=False)
     created_at = models.DateTimeField(default=timezone.now(), null=True)
+    difficulty_target = models.IntegerField(null=False, default=5)
+    nonce = models.IntegerField(null=False, default=0)
 
     def __str__(self):
         return self.hash_blockchain

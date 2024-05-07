@@ -38,6 +38,10 @@
                 <form method="POST" action="{% url 'mining' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
                     {% csrf_token %}
                     <div class="col-md-7">
+                        <label for="inputHeader" class="form-label">Header</label>
+                        <input name="header" type="text" class="form-control" id="inputHeader" placeholder="Dự đoán số Nonce">
+                    </div>
+                    <div class="col-md-7">
                         <label for="inputEmail4" class="form-label">Sender</label>
                         <input name="from_send" type="text" class="form-control" id="inputEmail4">
                     </div>

@@ -1,6 +1,5 @@
 import hashlib
 import json
-from fastapi import FastAPI
 
 from menu.models import Blockchains
 

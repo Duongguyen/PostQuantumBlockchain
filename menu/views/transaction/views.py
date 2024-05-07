@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from ...form.transaction.form import TransactionForm
 from ...models import User, Transaction
 from ..blockchain.create import create_blockchain_use_case
-from ...utils.common.security import mine
+from ...utils.common.security import mine, check_valid_mine
 
 
 def render_templates(request):
@@ -27,12 +27,15 @@ def mining_crypto(request):
                     "from_send": form['from_send'].value(),
                     "destination": form['destination'].value(),
                     "amount": form['amount'].value(),
+                    "header": form['header'].value()
                 }
-                handle = mine(data, 2, form['created_at'].value())
+                handle = check_valid_mine(data, form['created_at'].value())
                 if handle:
                     get_user = User.objects.get(username=form['from_send'].value())
-                    get_user.balance -= float(form['amount'].value())
-                    get_user.save()
+                    handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
+                                                                        destination=form['destination'].value(),
+                                                                        amount=5,
+                                                                        create_at=form['created_at'].value())
                     return render(request, 'mine_success.html')
                 else:
                     return render(request, '401.html')
@@ -60,7 +63,3 @@ def create_transaction_use_case(request):
                 return render(request, '401.html')
         else:
             return render(request, '500.html')
-
-
-
-
