@@ -3,7 +3,7 @@ import json
 
 from menu.models import Blockchains, Transaction
 from datetime import datetime
-from pqcrypto.pqcrypto.config import PUBLIC_KEY, SECRET_KEY
+from pqcrypto.pqcrypto.config import PUBLIC_KEY, SECRET_KEY, NONCE
 from pqcrypto.pqcrypto.sign.sphincs_sha256_256f_robust import generate_keypair, sign, verify
 
 
@@ -52,26 +52,11 @@ def check_blockchain():
         return False
 
 
-def check_valid_transaction(data, created_at):
-    results = Transaction.objects.all().values()
-    print(data)
-    for value in results:
-        original_datetime = datetime.strptime(str(value['created_at']), "%Y-%m-%d %H:%M:%S.%f%z")
-        formatted_string = original_datetime.strftime("%Y-%m-%dT%H:%M")
-        print(formatted_string)
-        if data['from_send'] == value['from_send'] and data['destination'] == value['destination'] \
-                and float(data['amount']) == value['amount'] and created_at == formatted_string:
-            return True
-    return False
-
-
 def mine(transactions, timestamp: str):
-    check_data = check_valid_transaction(transactions, timestamp)
-    if check_data:
         results = Blockchains.objects.all().values().last()
         block = json.dumps(transactions) + results['previous_hash'] + str(results['nonce']) + timestamp
         new_hash = SHA256(block)
-        while not new_hash.startswith(str(results['nonce']) * results['difficulty_target']):
+        while not new_hash.startswith(NONCE):
             results['nonce'] += 1
             block = json.dumps(transactions) + new_hash + str(results['nonce']) + timestamp
             new_hash = SHA256(block)
@@ -80,20 +65,13 @@ def mine(transactions, timestamp: str):
             return True
 
         return False
-    else:
-        return False
 
 
-def check_valid_mine(transactions, timestamp: str):
-    check_data = check_valid_transaction(transactions, timestamp)
-    if check_data:
-        results = Blockchains.objects.all().values().last()
-        block = json.dumps(transactions) + timestamp
-        new_hash = SHA256(block)
-        if new_hash.startswith(str(results['nonce']) * results['difficulty_target']):
-            return True
-        return False
-
+def check_valid_mine(transactions, nonce: int):
+    block = json.dumps(transactions) + str(nonce)
+    new_hash = SHA256(block)
+    if new_hash.startswith(str(NONCE)):
+        return new_hash
     return False
 
 
@@ -105,16 +83,27 @@ class Blockchain:
         block = Block(data)
         check = check_blockchain()
         results = Blockchains.objects.all().values().last()
+        print(data)
         if check:
-            value = results['hash_blockchain']
-            block.prev_hash = value
-            block.hash = str(results['nonce']) * results['difficulty_target'] + hash(block)
-
-            self.chain.append(block)
+            if data[0]["destination"] == "":
+                value = results['hash_blockchain']
+                block.prev_hash = value
+                block.hash = data[0]["hash_mine"]
+                self.chain.append(block)
+            else:
+                value = results['hash_blockchain']
+                block.prev_hash = value
+                block.hash = str(NONCE) + hash(block)
+                self.chain.append(block)
         else:
-            block.hash = str(results['nonce']) * results['difficulty_target'] + hash(block)
-            block.prev_hash = ""
-            self.chain.append(block)
+            if data[0]["destination"] == "":
+                block.prev_hash = ""
+                block.hash = data[0]["hash_mine"]
+                self.chain.append(block)
+            else:
+                block.hash = str(NONCE) + hash(block)
+                block.prev_hash = ""
+                self.chain.append(block)
 
     def get_blockchain(self):
         transaction = Transaction.objects.all().values().last()
@@ -145,9 +134,12 @@ class Blockchain:
 
     def get_balance(self, person):
         balance = 0
+        print(self.chain)
+        print(person)
         for block in self.chain:
             if type(block.data) != list:
                 continue
+
             for transfer in block.data:
                 if transfer["from"] == person:
                     balance = balance - transfer["amount"]

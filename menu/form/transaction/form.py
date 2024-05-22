@@ -14,3 +14,5 @@ class TransactionForm(forms.ModelForm):
         self.fields['destination_key'].required = False
         self.fields['created_at'].required = False
         self.fields['header'].required = False
+        self.fields['destination'].required = False
+        self.fields['amount'].required = False
