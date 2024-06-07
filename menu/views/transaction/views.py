@@ -2,7 +2,7 @@ import time
 from django.shortcuts import render, redirect
 
 from ...form.transaction.form import TransactionForm
-from ...models import User, Transaction
+from ...models import BlockchainUser, Transaction
 from ..blockchain.create import create_blockchain_use_case
 from ...utils.common.security import mine, check_valid_mine
 from django.utils import timezone
@@ -26,7 +26,7 @@ def create_transaction_use_case(request):
             #Thay uuid() vào
             form = TransactionForm(request.POST)
             a = form['from_send'].value()
-            get_user = User.objects.get(username=a)
+            get_user = BlockchainUser.objects.get(username=a)
             if (form.is_valid() and float(form['amount'].value()) <= float(get_user.balance) - 0.1 and
                     form['destination'].value() and form['amount'].value()):
 
@@ -57,7 +57,7 @@ def mining_crypto(request):
                 }
                 handle = check_valid_mine(data, form['header'].value())
                 if handle and form['header'].value():
-                    get_user = User.objects.get(username=form['from_send'].value())
+                    get_user = BlockchainUser.objects.get(username=form['from_send'].value())
                     handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
                                                                         amount=5,
                                                                         create_at=timestamp,

@@ -1,5 +1,5 @@
 from menu.utils.common.security import Blockchain
-from ...models import User
+from ...models import BlockchainUser
 
 
 def create_blockchain_use_case(from_send: str, amount: float, create_at: str, destination: str, hash_mine: str):
@@ -11,7 +11,7 @@ def create_blockchain_use_case(from_send: str, amount: float, create_at: str, de
          "hash_mine": hash_mine}
     ])
     get_blockchain = blockchain.get_blockchain()
-    get_user = User.objects.get(username=from_send)
+    get_user = BlockchainUser.objects.get(username=from_send)
     if destination == "":
         get_user.balance += float(amount)
     else:
