@@ -1,6 +1,6 @@
 from django.urls import path, include
 from .views.transaction.views import render_templates, sell_crypto,\
-    create_transaction_use_case, mine_crypto, mining_crypto
+    create_transaction_use_case, mine_crypto, mining_crypto, loginA
 
 urlpatterns = [
     path('', render_templates, name='base'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('mine/', mine_crypto, name='mine_crypto'),
     path('POST/transaction/', create_transaction_use_case, name='transaction'),
     path('POST/mining/', mining_crypto, name='mining'),
+    path('login/', loginA, name="login")
 ]

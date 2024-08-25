@@ -6,6 +6,7 @@ from ...models import BlockchainUser, Transaction
 from ..blockchain.create import create_blockchain_use_case
 from ...utils.common.security import mine, check_valid_mine
 from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout
 
 
 def render_templates(request):
@@ -73,3 +74,27 @@ def mining_crypto(request):
                 return render(request, '401.html')
         else:
             return render(request, '500.html')
+
+
+def loginA(request):
+    return render(request, 'login.html')
+    # if request.user.is_authenticated:
+    #     evolutions = IntroEvolution.objects.all()
+    #     return render(request, 'intro/tables_e.html', {'evolutions': evolutions})
+    #
+    # if request.method == "POST":
+    #     username = request.POST.get('username')
+    #     password = request.POST.get('password')
+    #     # form = RecapchaForm(request.POST)
+    #     if form.is_valid():
+    #         user = authenticate(request, username=username, password=password)
+    #         if user:
+    #             login(request, user)
+    #             evolutions = IntroEvolution.objects.all()
+    #             return render(request, 'intro/tables_evolution.html', {'evolutions': evolutions})
+    #         else:
+    #             messages.info(request, 'user or pass not correct!')
+    # # form = RecapchaForm()
+    # return render(request, 'app/login.html', {"form": form})
+# def select_balance():
+#     get_balance = BlockchainUser.objects.get(username=form['from_send'].value())
