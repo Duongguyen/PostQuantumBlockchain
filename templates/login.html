@@ -53,6 +53,19 @@
             background: #1e63d5;
         }
 
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 30px;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #565e64;
+        }
+
         .card-body img {
             border-radius: 15px;
         }
@@ -60,6 +73,17 @@
         .h1 {
             font-weight: 700;
             color: #333;
+        }
+
+        .alert {
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            text-align: center;
         }
     </style>
 </head>
@@ -76,7 +100,7 @@
                                 <!-- Form section -->
                                 <div class="col-md-6 col-lg-5 order-2 order-lg-1">
                                     <p class="text-center h1 fw-bold mb-5">Login</p>
-                                    <form method="post" action="{% url 'login' %}">
+                                    <form method="POST" action="{% url 'login' %}">
                                         {% csrf_token %}
                                         <div class="form-group mb-4">
                                             <label class="form-label" for="form3Example1c">Username</label>
@@ -89,13 +113,31 @@
 
                                         {{ form.captcha }}
                                         {% for error in form.captcha.errors %}
+
                                         <p>{{ error }}</p>
                                         {% endfor %}
 
-                                        <div class="d-flex justify-content-center mb-4">
-                                            <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                                        <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+
+                                        <div class="d-flex justify-content-center" style="margin-bottom: 20px;">
+<!--                                            <a type="submit" href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>-->
+                                            <button type="submit" class="btn btn-primary">Login</button>
                                         </div>
                                     </form>
+
+                                    <!-- Registration button -->
+                                    <div class="d-flex justify-content-center">
+                                        <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">Register</a>
+                                    </div>
+
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-danger">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+
                                 </div>
 
                                 <!-- Image section -->
@@ -116,6 +158,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 
 </html>

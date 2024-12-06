@@ -11247,3 +11247,40 @@ body {
     top: 500;
     right: 10;
 }
+
+/* Căn giữa khối hiển thị trong card */
+#crypto-prices {
+    margin-top: 50px; /* Tạo khoảng cách từ phía trên */
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 400px; /* Điều chỉnh chiều rộng tối đa */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng */
+    border-radius: 10px; /* Bo góc mềm mại */
+}
+
+#crypto-prices .card-header {
+    text-align: center;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#coin-list .list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#coin-list .list-group-item:last-child {
+    border-bottom: none;
+}
+
+#coin-list img {
+    border-radius: 50%;
+}
+
+#coin-list .text-success {
+    font-weight: bold;
+}
+
+#coin-list .text-danger {
+    font-weight: bold;
+}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="margin-left: 20px;">
+  <div class="card">
+    <div class="card-header">
+      <h2>{{ news_item.title }}</h2>
+    </div>
+    <div class="card-body">
+      <p><strong>Nội dung:</strong></p>
+      <p>{{ news_item.content }}</p>
+    </div>
+    <div class="card-footer">
+      <p><strong>Người dùng:</strong> {{ news_item.user_id }}</p>
+      <p><strong>Thẻ:</strong> {{ news_item.tag }}</p>
+      <p><strong>Thích:</strong> {{ news_item.like }} | <strong>Chia sẻ:</strong> {{ news_item.share }}</p>
+    </div>
+  </div>
+</div>
+{% endblock content %}

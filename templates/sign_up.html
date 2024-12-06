@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="">
+        <title>Registration Page</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{% static 'app/css/styles.css' %}">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script type="text/javascript">
+            var user = '{{ request.user }}';
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+        </script>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <!-- Custom CSS -->
+        <style>
+            body {
+                background-color: #f7f7f7;
+                background-image: url('https://www.toptal.com/designers/subtlepatterns/patterns/diagonal-stripes.png');
+                background-repeat: repeat;
+                font-family: 'Roboto', sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .card {
+                border-radius: 20px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .form-label {
+                font-weight: 500;
+            }
+
+            .form-control {
+                border-radius: 10px;
+                padding: 15px;
+                font-size: 16px;
+            }
+
+            .btn-primary {
+                background: #2575fc;
+                border: none;
+                padding: 10px 30px;
+                border-radius: 50px;
+                font-size: 18px;
+                transition: background 0.3s;
+            }
+
+            .btn-primary:hover {
+                background: #1e63d5;
+            }
+
+            .form-check {
+                display: flex;
+                align-items: center;
+                gap: 10px; /* Khoảng cách giữa checkbox và văn bản */
+            }
+
+            .form-check-input {
+                margin-left: 10px; /* Tạo khoảng cách hợp lý */
+            }
+            .btn-outline-primary {
+                width: 100%; /* Nút bấm rộng đều */
+                margin: 10px 0;
+            }
+
+            .form-check-label {
+                font-size: 14px;
+                margin-bottom: 0;
+            }
+
+            .h1 {
+                font-weight: 700;
+                color: #333;
+                margin-bottom: 30px;
+            }
+
+            .img-fluid {
+                max-width: 80%;
+                height: auto;
+                display: block;
+                margin: auto;
+            }
+
+            .alert {
+                font-size: 16px;
+                margin-top: 20px;
+                border-radius: 10px;
+                padding: 15px;
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+                text-align: center;
+            }
+
+            .form-outline {
+                margin-bottom: 20px;
+            }
+
+            .container {
+                max-width: 900px;
+            }
+        </style>
+    </head>
+    <body>
+        {% block register %}
+        <section class="vh-100">
+            <div class="container">
+                <div class="row justify-content-center align-items-center h-100">
+                    <div class="col-lg-12 col-xl-11">
+                        <div class="card text-black">
+                            <div class="card-body p-md-5">
+                                <div class="row justify-content-center">
+                                    <!-- Form Section -->
+                                    <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
+                                        <p class="text-center h1 fw-bold">Sign Up</p>
+                                        <form method="POST" action="{% url 'process_register' %}">
+                                            {% csrf_token %}
+                                            <div class="form-outline">
+                                                <label class="form-label" for="username">Username</label>
+                                                <input type="text" name="username" id="username" class="form-control" required />
+                                            </div>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="email">Email</label>
+                                                <input type="text" name="email" id="email" class="form-control" required />
+                                            </div>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="first_name">Firstname</label>
+                                                <input type="text" name="first_name" id="first_name" class="form-control" required />
+                                            </div>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="last_name">Lastname</label>
+                                                <input type="text" name="last_name" id="last_name" class="form-control" required />
+                                            </div>
+
+                                            <label class="form-label" for="gender">Gender</label>
+                                            <select name="gender" id="gender" class="form-select" aria-label="Default select example" style="width: 70%" >
+                                              <option value="MALE">MALE</option>
+                                              <option value="FEMALE">FEMALE</option>
+                                            </select><br>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="birthday">Birthday</label>
+                                                <input type="date" name="birthday" id="birthday" class="form-control" required />
+                                            </div>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="phone">Phone Number</label>
+                                                <input type="tel" name="phone" id="phone" class="form-control" pattern="[0-9]{10}" required />
+                                            </div>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="password1">Password</label>
+                                                <input type="password" name="password1" id="password1" class="form-control" required />
+                                            </div>
+
+                                            <div class="form-outline">
+                                                <label class="form-label" for="password2">Repeat password</label>
+                                                <input type="password" name="password2" id="password2" class="form-control" required />
+                                            </div>
+
+<!--                                            <div class="form-check d-flex justify-content-center mb-4">-->
+<!--                                                <input class="form-check-input" type="checkbox" value="" id="terms" required>-->
+<!--                                                <label class="form-check-label" for="terms">-->
+<!--                                                    I agree to all statements in <a href="#!">Terms of service</a>-->
+<!--                                                </label>-->
+<!--                                            </div>-->
+
+                                            <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+
+                                            <div class="d-flex justify-content-center" style="margin-bottom: 20px;">
+                                                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>
+                                            </div>
+
+                                            <div class="d-flex justify-content-center">
+                                                <button type="submit" class="btn btn-outline-primary btn-lg">Register</button>
+                                            </div>
+
+                                            {% if messages %}
+                                            <div class="alert alert-danger text-center">
+                                                {% for message in messages %}
+                                                    <p>{{ message }}</p>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+
+                                        </form>
+                                    </div>
+                                    <!-- Image Section -->
+                                    <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
+                                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp" class="img-fluid" alt="Sample image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endblock register %}
+    </body>
+</html>

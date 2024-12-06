@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = "django-insecure-+3yhw87m&%yw2f(+2)lpq53s4qqy(=na+zarea)iy9-*@d$92(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "templates",
     "menu",
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
     "django_filters",
 ]
@@ -75,7 +77,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "Block_Chain.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -107,6 +108,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+      'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
@@ -160,3 +164,14 @@ MEDIA_ROOT = BASE_DIR / 'images'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#email
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bitcoinvietnam1811@gmail.com'
+EMAIL_HOST_PASSWORD = 'eiedxakkxhkiobdt'
+
+#capcha
+RECAPTCHA_PUBLIC_KEY = '6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro'
+RECAPTCHA_PRIVATE_KEY = '6LdCS4QqAAAAAP54R6_B7rZ8Z00PTqUwehFqHlgu'

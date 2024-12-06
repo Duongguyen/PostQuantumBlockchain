@@ -3,6 +3,7 @@ from django.db import models
 from menu.utils.common.time_system import naive_now
 from menu.utils.common import get_uuid4
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class Transaction(models.Model):
@@ -30,13 +31,15 @@ class Blockchains(models.Model):
 
 
 class BlockchainUser(models.Model):
-    username = models.CharField(max_length=200, null=False, unique=True)
-    password = models.CharField(max_length=200, null=False)
-    name = models.TextField(max_length=2000, null=False)
-    address_wallet = models.CharField(max_length=200, null=False, unique=True, default=get_uuid4())
-
+    username = models.CharField(max_length=50, null=False, unique=True)
+    password1 = models.CharField(max_length=200, null=True)
+    password2 = models.CharField(max_length=200, null=True)
+    email = models.EmailField(max_length=255, null=True, unique=True)
+    name = models.TextField(max_length=50, null=False)
+    address_wallet = models.CharField(max_length=200, null=False)
     balance = models.FloatField(null=False, default=0)
-    phone = models.IntegerField(null=False)
+    phone = models.IntegerField(null=False, unique=True)
+    is_verified = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(default=naive_now(), null=True)
     updated_at = models.DateTimeField(default=naive_now(), null=True)
@@ -45,4 +48,40 @@ class BlockchainUser(models.Model):
 
     def __str__(self):
         return self.username
+
+
+class Account(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    birthday = models.DateField()
+    phone = models.IntegerField(null=False, unique=True)
+    gender = models.CharField(
+        max_length=6
+    )
+    balance = models.FloatField(null=False, default=0)
+    address_wallet = models.CharField(max_length=200, null=False)
+    is_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
+
+
+class New(models.Model):
+    user_id = models.IntegerField(null=False, unique=True)
+    title = models.CharField(max_length=300)
+    content = models.TextField(max_length=2000)
+    like = models.IntegerField(default=0)
+    share = models.IntegerField(default=0)
+    tag = models.CharField(max_length=50)
+    summary = models.CharField(max_length=50)
+
+    def __int__(self):
+        return self.user_id
+
+
+class TitlePage(models.Model):
+    title = models.CharField(max_length=100)
+    link = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.title
 

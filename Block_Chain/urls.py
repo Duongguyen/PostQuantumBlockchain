@@ -22,7 +22,7 @@ from django.conf import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', include(router.urls)),
+    path('API/', include(router.urls)),
     path('blockchains/', include('menu.urls'))
 ]
 
