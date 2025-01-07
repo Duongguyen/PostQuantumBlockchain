@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block page_sell %}
+<div style="max-width: 85%; margin: 0 auto; padding: 20px; border-radius: 10px; margin-top: 40px; margin-right: 15px;">
+    <h2 class="mb-4 d-flex justify-content-between">
+        Pending Transactions
+        <!-- Nút Sell nằm ở góc phải -->
+        <a href="{% url 'sell_crypto' %}" class="btn btn-success btn-lg" style="margin-right: 40px; margin-top: 10px;">Sell</a>
+    </h2>
+    {% if pending_transactions %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for transaction in pending_transactions %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">From: {{ transaction.from_send }}</h5>
+                    <p class="card-text">
+                        <strong>Amount:</strong> {{ transaction.amount }} <br>
+                        <strong>Destination Key:</strong> {{ transaction.from_key }} <br>
+                        <strong>Created At:</strong> {{ transaction.created_at|date:"d M Y, H:i" }}
+                    </p>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{% url 'mark_as_sold' transaction.id %}" class="btn btn-primary btn-sm">Mark as Sold</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning">No pending transactions found.</div>
+    {% endif %}
+</div>
+{% endblock page_sell %}

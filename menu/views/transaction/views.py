@@ -1,6 +1,8 @@
 import time
 import hashlib
 import requests
+import random
+import string
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
@@ -17,6 +19,11 @@ from .utils import email_verification_token
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import check_password
+from django.core.cache import cache
 
 def render_templates(request):
     if request.user.is_authenticated:
@@ -90,8 +97,31 @@ def login_base(request):
 def news_detail(request, news_id):
     # Lấy bài viết từ cơ sở dữ liệu, nếu không tìm thấy sẽ trả về 404
     news = get_object_or_404(New, id=news_id)
-    return render(request, 'news_detail.html', {'news': news})
+    user = get_object_or_404(User, id=news.user_id)
+    return render(request, 'news_detail.html', {'news_item': news, 'username': user.username})
 
+
+@login_required
+@csrf_exempt
+def toggle_like(request, news_id):
+    print("x")
+    if request.method == "POST":
+        news = get_object_or_404(New, id=news_id)
+        user_id = request.user.id
+
+        # Kiểm tra xem user đã thích bài viết chưa
+        if user_id in news.liked_users:
+            news.liked_users.remove(user_id)
+            news.like -= 1
+        else:
+            news.liked_users.append(user_id)
+            news.like += 1
+
+        news.save()
+
+        return JsonResponse({'success': True, 'like_count': news.like})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
 
 def register(request):
     return render(request, 'sign_up.html')
@@ -190,7 +220,7 @@ def process_register(request):
                 send_verification_email(user, request)
 
                 messages.success(request, "Vui lòng kiểm tra email của bạn để xác thực tài khoản!")
-                return redirect('login')
+                return redirect('homepage')
 
         else:
             messages.error(request, "Đăng ký không thành công! Vui lòng kiểm tra lại.")
@@ -216,26 +246,28 @@ def verify_email(request, uidb64, token):
         return render(request, 'sign_up.html')
 
 
-def create_transaction_use_case(request):
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            form = TransactionForm(request.POST)
-            a = form['from_send'].value()
-            get_user = BlockchainUser.objects.get(username=a)
-            if (form.is_valid() and float(form['amount'].value()) <= float(get_user.balance) - 0.1 and
-                    form['destination'].value() and form['amount'].value()):
-
-                form.save()
-                handle = create_blockchain_use_case(from_send=form['from_send'].value(),
-                                                    destination=form['destination'].value(),
-                                                    amount=form['amount'].value(),
-                                                    create_at=form['created_at'].value(),
-                                                    hash_mine="")
-                return render(request, 'index.html')
-            else:
-                return render(request, '401.html')
-        else:
-            return render(request, '500.html')
+# def create_transaction_use_case(request):
+#     if request.user.is_authenticated:
+#         if request.method == 'POST':
+#             form = TransactionForm(request.POST)
+#             a = form['from_send'].value()
+#             get_user = User.objects.get(username=a)
+#             get_detail_user = Account.objects.get(user_id=get_user.id)
+#             if (form.is_valid() and float(form['amount'].value()) <= float(get_detail_user.balance) - 0.1 and
+#                     get_user.check_password(form['pass_check'].value()) and form['amount'].value()):
+#
+#                 form.save()
+#                 handle = create_blockchain_use_case(from_send=form['from_send'].value(),
+#                                                     destination=form['destination'].value(),
+#                                                     amount=form['amount'].value(),
+#                                                     create_at=form['created_at'].value(),
+#                                                     hash_mine="",
+#                                                     user_id=get_user.id)
+#                 return render(request, 'index.html')
+#             else:
+#                 return render(request, '401.html')
+#         else:
+#             return render(request, '500.html')
 
 
 def mining_crypto(request):
@@ -257,7 +289,8 @@ def mining_crypto(request):
                                                                     amount=5,
                                                                     create_at=timestamp,
                                                                     destination="",
-                                                                    hash_mine=handle)
+                                                                    hash_mine=handle,
+                                                                    user_id=get_user.id)
                 end_time = time.time()
                 print(f"Thời gian chạy: {end_time - start_time} giây")
                 return render(request, 'mine_success.html')

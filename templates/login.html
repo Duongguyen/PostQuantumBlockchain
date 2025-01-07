@@ -100,7 +100,7 @@
                                 <!-- Form section -->
                                 <div class="col-md-6 col-lg-5 order-2 order-lg-1">
                                     <p class="text-center h1 fw-bold mb-5">Login</p>
-                                    <form method="POST" action="{% url 'login' %}">
+                                    <form method="POST" action="{% url 'homepage' %}">
                                         {% csrf_token %}
                                         <div class="form-group mb-4">
                                             <label class="form-label" for="form3Example1c">Username</label>
@@ -120,7 +120,6 @@
                                         <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
 
                                         <div class="d-flex justify-content-center" style="margin-bottom: 20px;">
-<!--                                            <a type="submit" href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Login</a>-->
                                             <button type="submit" class="btn btn-primary">Login</button>
                                         </div>
                                     </form>

@@ -24,3 +24,31 @@ window.addEventListener('DOMContentLoaded', event => {
     }
 
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+    const likeButton = document.querySelector(".fa-thumbs-up");
+    const likeCount = likeButton.nextElementSibling;
+
+    likeButton.addEventListener("click", function() {
+        fetch("{% url 'toggle_like' news_item.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Cập nhật số lượt thích trên giao diện
+                likeCount.textContent = data.like_count;
+            } else {
+                alert("Có lỗi xảy ra!");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Có lỗi xảy ra khi kết nối tới server!");
+        });
+    });
+});

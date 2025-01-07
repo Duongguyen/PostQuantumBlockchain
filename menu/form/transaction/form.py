@@ -13,10 +13,10 @@ class TransactionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['from_key'].required = False
-        self.fields['destination_key'].required = False
+        self.fields['pass_check'].required = False
         self.fields['created_at'].required = False
         self.fields['header'].required = False
-        self.fields['destination'].required = False
+        self.fields['destination_key'].required = False
         self.fields['amount'].required = False
 
 

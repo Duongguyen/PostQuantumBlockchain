@@ -1,20 +1,57 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="container mt-5" style="margin-left: 20px;">
-  <div class="card">
-    <div class="card-header">
-      <h2>{{ news_item.title }}</h2>
+{% block new %}
+<div class="container mt-5 d-flex justify-content-end" style="margin-right: 1300px;">
+    <div class="card" style="width: 83%;">
+        <div class="card-header">
+            <h2>{{ news_item.title }}</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Nội dung:</strong></p>
+            <p>{{ news_item.content }}</p>
+        </div>
+        <div class="card-footer">
+            <p><strong>Người dùng:</strong> {{ username }}</p>
+            <p><strong>Thẻ:</strong> {{ news_item.tag }}</p>
+            <p>
+                <strong>Thích:</strong>
+                <i class="fas fa-thumbs-up" style="cursor: pointer;"></i>
+                <span>{{ news_item.like }}</span>
+                <strong>Chia sẻ:</strong> <i class="fas fa-share"></i> {{ news_item.share }}
+            </p>
+        </div>
     </div>
-    <div class="card-body">
-      <p><strong>Nội dung:</strong></p>
-      <p>{{ news_item.content }}</p>
-    </div>
-    <div class="card-footer">
-      <p><strong>Người dùng:</strong> {{ news_item.user_id }}</p>
-      <p><strong>Thẻ:</strong> {{ news_item.tag }}</p>
-      <p><strong>Thích:</strong> {{ news_item.like }} | <strong>Chia sẻ:</strong> {{ news_item.share }}</p>
-    </div>
-  </div>
 </div>
-{% endblock content %}
+{% endblock new %}
+
+<!--{% block script %}-->
+<!--<script>-->
+<!--document.addEventListener("DOMContentLoaded", function() {-->
+<!--    const likeButton = document.querySelector(".fa-thumbs-up");-->
+<!--    const likeCount = likeButton.nextElementSibling;-->
+
+<!--    likeButton.addEventListener("click", function() {-->
+<!--        fetch("{% url 'toggle_like' news_item.id %}", {-->
+<!--            method: "POST",-->
+<!--            headers: {-->
+<!--                "X-CSRFToken": "{{ csrf_token }}",-->
+<!--                "Content-Type": "application/json"-->
+<!--            }-->
+<!--        })-->
+<!--        .then(response => response.json())-->
+<!--        .then(data => {-->
+<!--            if (data.success) {-->
+<!--                // Cập nhật số lượt thích trên giao diện-->
+<!--                likeCount.textContent = data.like_count;-->
+<!--            } else {-->
+<!--                alert("Có lỗi xảy ra!");-->
+<!--            }-->
+<!--        })-->
+<!--        .catch(error => {-->
+<!--            console.error("Error:", error);-->
+<!--            alert("Có lỗi xảy ra khi kết nối tới server!");-->
+<!--        });-->
+<!--    });-->
+<!--});-->
+<!--</script>-->
+<!--{% endblock script %}-->
