@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block verification_sell %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; margin-top: 100px;">
+    <h2>Verify OTP</h2>
+    <p>We have sent an OTP to your email. Please enter the code below to proceed.</p>
+
+    {% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'otp_verification_sell' transaction.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="otp_code" class="form-label">Enter OTP:</label>
+            <input type="text" class="form-control" id="otp_code" name="otp_code" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Verify OTP</button>
+        <a href="{% url 'pending_transactions' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock verification_sell %}

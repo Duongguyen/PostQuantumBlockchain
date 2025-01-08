@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block process_sell %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; margin-top: 100px;">
+    <h2>Transaction Details</h2>
+    <p><strong>From:</strong> {{ transaction.from_send }}</p>
+    <p><strong>Amount:</strong> {{ transaction.amount }}</p>
+    <p><strong>Destination Key:</strong> {{ transaction.from_key }}</p>
+    <p><strong>Created At:</strong> {{ transaction.created_at|date:"d M Y, H:i" }}</p>
+
+    <form method="POST" action="{% url 'transaction_detail' transaction.id %}" class="row g-3" style="margin-top: 30px; margin-left: 30px">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="password" class="form-label">Enter Your Password to Confirm:</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        {{ form.captcha }}
+        {% for error in form.captcha.errors %}
+
+        <p>{{ error }}</p>
+        {% endfor %}
+
+        <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+        <button type="submit" class="btn btn-primary">Confirm</button>
+        <a href="{% url 'pending_transactions' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock process_sell %}

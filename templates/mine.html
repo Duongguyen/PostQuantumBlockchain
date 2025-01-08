@@ -3,6 +3,13 @@
 {% block mine %}
 <div id="layoutSidenav">
     <div id="layoutSidenav_content">
+        <!-- Nút "Sell" -->
+        <a href="{% url 'sell_crypto' %}"
+           class="btn btn-success btn-lg"
+           style="position: absolute; top: 30px; right: 90px; width: 100px; height: 50px; display: flex; justify-content: center; align-items: center;">
+            Excavator
+        </a>
+
         <form method="POST" action="{% url 'mining' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
             {% csrf_token %}
             <div class="col-md-7">
@@ -13,6 +20,14 @@
                 <label for="inputEmail4" class="form-label">Sender</label>
                 <input name="from_send" type="text" class="form-control" id="inputEmail4" placeholder="Người gửi">
             </div>
+
+            {{ form.captcha }}
+            {% for error in form.captcha.errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+
+            <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Mine</button>
             </div>

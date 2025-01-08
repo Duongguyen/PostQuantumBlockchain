@@ -229,21 +229,35 @@ def process_register(request):
     form = CreateUserForm()
     return render(request, 'sign_up.html', {'form': form})
 
-def verify_email(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user and email_verification_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, "Xác thực tài khoản thành công!")
-        return render(request, 'login.html')
-    else:
-        messages.error(request, "Liên kết xác thực không hợp lệ hoặc đã hết hạn!")
-        return render(request, 'sign_up.html')
+def mining_crypto(request):
+    start_time = time.time()
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            form = TransactionForm(request.POST)
+            if form.is_valid():
+                timestamp = timezone.now()
+                text_timestamp = str(timestamp)
+                data = {
+                    "from_send": request.user.username,
+                    # "timestamp": text_timestamp
+                }
+                handle = check_valid_mine(data, form['header'].value())
+                if handle and form['header'].value():
+                    handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
+                                                                        amount=5,
+                                                                        create_at=timestamp,
+                                                                        destination="",
+                                                                        hash_mine=handle,
+                                                                        user_id=request.user.id)
+                    end_time = time.time()
+                    print(f"Thời gian chạy: {end_time - start_time} giây")
+                    return render(request, 'mine_success.html')
+                else:
+                    return render(request, '401.html')
+            else:
+                return render(request, '401.html')
+        else:
+            return render(request, '500.html')
 
 
 # def create_transaction_use_case(request):
@@ -270,36 +284,21 @@ def verify_email(request, uidb64, token):
 #             return render(request, '500.html')
 
 
-def mining_crypto(request):
-    start_time = time.time()
-    # if request.user.is_authenticated:
-    if request.method == 'POST':
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            timestamp = timezone.now()
-            text_timestamp = str(timestamp)
-            data = {
-                "from_send": form['from_send'].value(),
-                # "timestamp": text_timestamp
-            }
-            handle = check_valid_mine(data, form['header'].value())
-            if handle and form['header'].value():
-                get_user = BlockchainUser.objects.get(username=form['from_send'].value())
-                handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
-                                                                    amount=5,
-                                                                    create_at=timestamp,
-                                                                    destination="",
-                                                                    hash_mine=handle,
-                                                                    user_id=get_user.id)
-                end_time = time.time()
-                print(f"Thời gian chạy: {end_time - start_time} giây")
-                return render(request, 'mine_success.html')
-            else:
-                return render(request, '401.html')
-        else:
-            return render(request, '401.html')
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and email_verification_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, "Xác thực tài khoản thành công!")
+        return render(request, 'login.html')
     else:
-        return render(request, '500.html')
+        messages.error(request, "Liên kết xác thực không hợp lệ hoặc đã hết hạn!")
+        return render(request, 'sign_up.html')
 
 # def select_balance():
 #     get_balance = BlockchainUser.objects.get(username=form['from_send'].value())

@@ -19,9 +19,18 @@
                 <label for="inputAddress" class="form-label">Current Password</label>
                 <input style="width: 200px" name="pass_check" type="password" class="form-control" id="inputAddress" placeholder="">
             </div>
+            {{ form.captcha }}
+            {% for error in form.captcha.errors %}
+
+            <p>{{ error }}</p>
+            {% endfor %}
+
+            <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Sell</button>
             </div>
+
         </form>
     </div>
 </div>
