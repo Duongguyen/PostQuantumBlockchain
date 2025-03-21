@@ -1,28 +1,49 @@
 from datetime import datetime
 
 from menu.utils.common.security import Blockchain
-from ...models import BlockchainUser, User, Account
+from ...models import Account
+from ..transaction.utils import verify_sign_transactions
+from pqcrypto.pqcrypto.config import PDD_SEA, SK_SEA
+from ...utils.common.security import encrypt_aes_256, decrypt_aes_256
 
 
-def create_blockchain_use_case(from_send: str, amount: float, create_at: str, destination: str, hash_mine: str, user_id: str):
+def create_blockchain_use_case(encrypt_data_block: bytes, hash_mine: str, user_id: str, signature_hex, data):
     blockchain = Blockchain()
+    ver = verify_sign_transactions(signature_hex, data, user_id)
+    if ver:
+        sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
+        pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
+        encrypt_data_block = decrypt_aes_256(encrypt_data_block, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+        decoded_string = encrypt_data_block.decode("utf-8")
+        data_split = decoded_string.split(",")
 
-    if isinstance(create_at, datetime):
-        create_at = create_at.strftime('%Y-%m-%d %H:%M:%S')
+        if isinstance(data_split[3], datetime):
+            data_split[3] = data_split[3].strftime('%Y-%m-%d %H:%M:%S')
+            print(data_split[3])
 
-    blockchain.add_block([
-        {"from": from_send,
-         "create_at": create_at,
-         "destination": destination,
-         "hash_mine": hash_mine}
-    ])
-    get_blockchain = blockchain.get_blockchain()
-    get_user = Account.objects.get(user_id=user_id)
-    if destination == "":
-        get_user.balance += float(amount)
-    else:
-        get_user.balance -= float(amount)
-    get_user.save()
-    # get_balance = blockchain.get_balance(from_send)
+
+        blockchain.add_block([
+            {"from": data_split[0],
+             "create_at": data_split[3],
+             "destination": data_split[1],
+             "hash_mine": hash_mine}
+        ])
+
+        get_blockchain = blockchain.get_blockchain()
+        get_user = Account.objects.get(user_id=user_id)
+        get_destination = Account.objects.get(user_id=user_id)
+        if data_split[1] and data_split[0]:
+            get_user.balance -= float(data_split[2])
+            get_destination.balance += float(data_split[2])
+
+        elif data_split[1] == "":
+            get_user.balance += float(data_split[2])
+        else:
+            get_user.balance -= float(data_split[2])
+
+        get_user.save()
+        return True
+    return False
+        # get_balance = blockchain.get_balance(from_send)
 
 

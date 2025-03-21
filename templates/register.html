@@ -9,8 +9,103 @@
         <title>Register - SB Admin</title>
         <link href="css/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <style>
+            /* Tạo nền gradient mềm mại */
+        body {
+            background: #f0f2f5;
+            background-image: url('https://www.toptal.com/designers/subtlepatterns/patterns/diagonal-stripes.png');
+            background-repeat: repeat;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+        }
+
+            /* Tạo bo góc và bóng đổ cho card */
+            .card {
+                border-radius: 25px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+                transition: all 0.3s ease;
+                padding: 30px;
+                background-color: white;
+                width: 100%;
+                max-width: 500px;
+            }
+
+            /* Hiệu ứng hover khi di chuột vào card */
+            .card:hover {
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+                transform: translateY(-5px);
+            }
+
+            /* Header card với màu sắc tươi sáng */
+            .card-header {
+                background-color: #2575fc;
+                color: white;
+                border-radius: 25px 25px 0 0;
+                padding: 20px;
+                text-align: center;
+            }
+
+            /* Tạo các input đẹp hơn */
+            .form-floating .form-control {
+                border-radius: 25px;
+                padding: 15px;
+                font-size: 16px;
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+                transition: border-color 0.3s ease;
+            }
+
+            /* Hiệu ứng khi ô nhập được focus */
+            .form-floating .form-control:focus {
+                border-color: #2575fc;
+                box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
+            }
+
+            /* Nút đăng ký đẹp và dễ chịu */
+            .btn-primary {
+                background: #2575fc;
+                border: none;
+                border-radius: 50px;
+                padding: 15px 30px;
+                font-size: 18px;
+                text-align: center;
+                transition: background 0.3s ease;
+            }
+
+            /* Hiệu ứng hover cho nút đăng ký */
+            .btn-primary:hover {
+                background: #1e63d5;
+            }
+
+            /* Footer với các liên kết đẹp mắt */
+            .footer-links {
+                color: #2575fc;
+                font-size: 16px;
+                text-decoration: none;
+            }
+
+            .footer-links:hover {
+                text-decoration: underline;
+            }
+
+            /* Định dạng footer */
+            .footer {
+                background-color: #f8f9fa;
+                margin-top: 20px;
+                text-align: center;
+                padding: 10px;
+            }
+
+            /* Phần chứa nội dung chính */
+            .container {
+                padding-top: 40px;
+            }
+        </style>
     </head>
-    <body class="bg-primary">
+    <body>
         <div id="layoutAuthentication">
             <div id="layoutAuthentication_content">
                 <main>
@@ -18,7 +113,9 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-7">
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                    <div class="card-header"><h3 class="text-center font-weight-light my-4">Create Account</h3></div>
+                                    <div class="card-header">
+                                        <h3 class="font-weight-light my-4">Create Account</h3>
+                                    </div>
                                     <div class="card-body">
                                         <form>
                                             <div class="row mb-3">
@@ -54,12 +151,16 @@
                                                 </div>
                                             </div>
                                             <div class="mt-4 mb-0">
-                                                <div class="d-grid"><a class="btn btn-primary btn-block" href="login.html">Create Account</a></div>
+                                                <div class="d-grid">
+                                                    <a class="btn btn-primary btn-block" href="login.html">Create Account</a>
+                                                </div>
                                             </div>
                                         </form>
                                     </div>
                                     <div class="card-footer text-center py-3">
-                                        <div class="small"><a href="login.html">Have an account? Go to login</a></div>
+                                        <div class="small">
+                                            <a href="login.html" class="footer-links">Have an account? Go to login</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -68,14 +169,14 @@
                 </main>
             </div>
             <div id="layoutAuthentication_footer">
-                <footer class="py-4 bg-light mt-auto">
+                <footer class="footer py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
                             <div class="text-muted">Copyright &copy; Your Website 2023</div>
                             <div>
-                                <a href="#">Privacy Policy</a>
+                                <a href="#" class="footer-links">Privacy Policy</a>
                                 &middot;
-                                <a href="#">Terms &amp; Conditions</a>
+                                <a href="#" class="footer-links">Terms & Conditions</a>
                             </div>
                         </div>
                     </div>

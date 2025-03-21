@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block my_transactions %}
+<div class="transactions-container" style="margin-right: -1cm;">
+    <h1 class="mb-4">My Transactions</h1>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>From</th>
+                <th>Destination</th>
+                <th>Amount</th>
+                <th>Created At</th>
+                <th>Hash Session</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ transaction.from_send }}</td>
+                <td>{{ transaction.destination }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>{{ transaction.created_at }}</td>
+                <td>{{ transaction.hash_session }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No transactions found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock my_transactions %}

@@ -70,6 +70,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                'Block_Chain.context_processors.user_keys',
+                'Block_Chain.context_processors.user_balance',
+                'Block_Chain.context_processors.user_info'
             ],
         },
     },

@@ -1,23 +1,25 @@
 from django.urls import path, include
 
 from .views.transaction.views import (base, sell_crypto,\
-    mine_crypto, mining_crypto, register, login_base, log_out, process_register,
-                                      render_templates, verify_email, news_detail, toggle_like)
-from .views.transaction.transactions import (create_transaction_use_case, otp_verification_view, pending_transactions_view,
-                                             mark_as_sold, transaction_detail, otp_verification_sell, process_sell)
+    mine_crypto, authenticity_mine, register, login_base, log_out, process_register,
+                                      render_templates, verify_email, news_detail, toggle_like, mining_page, mining_crypto_sph)
+from .views.transaction.transactions import (create_transaction_use_case, otp_verification_view, pending_transactions_view, transaction_detail, process_sell, my_transactions)
 
 urlpatterns = [
     path('', base, name='base'),
     path('start/', render_templates, name='start'),
     path('sell_crypto/', sell_crypto, name='sell_crypto'),
     path('mine/', mine_crypto, name='mine_crypto'),
+    path('authenticity_mine/', authenticity_mine, name='authenticity_mine'),
     path('POST/transaction/', create_transaction_use_case, name='transaction'),
-    path('verification', otp_verification_view, name='otp_verification_page'),
+    path('verification/<str:result>/', otp_verification_view, name='otp_verification_page'),
     path('pending-transactions/', pending_transactions_view, name='pending_transactions'),
-    path('verification_sell/<int:transaction_id>/', otp_verification_sell, name='otp_verification_sell'),
+    # path('verification_sell/<int:transaction_id>/', otp_verification_sell, name='otp_verification_sell'),
     path('transaction/<int:transaction_id>/', transaction_detail, name='transaction_detail'),
+    path('my-transactions/', my_transactions, name='my_transactions'),
     path('process_sell/<int:transaction_id>/', process_sell, name='process_sell'),
-    path('POST/mining/', mining_crypto, name='mining'),
+    path('POST/mining/', mining_crypto_sph, name='mining_crypto'),
+    path('mining_page/', mining_page, name='mining_page'),
     path('homepage/', login_base, name="homepage"),
     path('register/', register, name="register"),
     path('process_register/', process_register, name="process_register"),

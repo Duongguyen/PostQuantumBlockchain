@@ -1,34 +1,53 @@
 {% extends 'base.html' %}
 
 {% block page_sell %}
-<div style="max-width: 85%; margin: 0 auto; padding: 20px; border-radius: 10px; margin-top: 40px; margin-right: 15px;">
-    <h2 class="mb-4 d-flex justify-content-between">
-        Pending Transactions
-        <!-- Nút Sell nằm ở góc phải -->
-        <a href="{% url 'sell_crypto' %}" class="btn btn-success btn-lg" style="margin-right: 40px; margin-top: 10px;">Sell</a>
-    </h2>
+<div class="container py-5" style="margin-top: 10px; margin-right: 40px">
+    <div class="text-center mb-4" style="margin-top: 20px">
+        <h2 class="fw-bold text-primary">Pending Transactions</h2>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'sell_crypto' %}" class="btn btn-success btn-lg shadow-sm">
+            <i class="fas fa-coins"></i> Sell
+        </a>
+    </div>
+
     {% if pending_transactions %}
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="list-group">
         {% for transaction in pending_transactions %}
-        <div class="col">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">From: {{ transaction.from_send }}</h5>
-                    <p class="card-text">
+        <div class="list-group-item list-group-item-action shadow-sm mb-3 rounded border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1 text-secondary">
+                        <i class="fas fa-user"></i> From: <span class="fw-bold">{{ transaction.from_send }}</span>
+                    </h5>
+                    <p class="mb-1 text-muted">
                         <strong>Amount:</strong> {{ transaction.amount }} <br>
                         <strong>Destination Key:</strong> {{ transaction.from_key }} <br>
                         <strong>Created At:</strong> {{ transaction.created_at|date:"d M Y, H:i" }}
                     </p>
                 </div>
-                <div class="card-footer text-end">
-                    <a href="{% url 'process_sell' transaction.id %}" class="btn btn-primary btn-sm">Mark as Sold</a>
-                </div>
+                <a href="{% url 'process_sell' transaction.id %}" class="btn btn-primary">
+                    <i class="fas fa-shopping-cart"></i> Buy
+                </a>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-warning">No pending transactions found.</div>
+    <div class="alert alert-warning text-center">
+        <i class="fas fa-exclamation-circle"></i> No pending transactions found.
+    </div>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if forloop.first %}
+                <div class="alert alert-success text-center mt-4">
+                    <i class="fas fa-check-circle"></i> {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
     {% endif %}
 </div>
 {% endblock page_sell %}

@@ -4,21 +4,27 @@
 <div id="layoutSidenav">
     <div id="layoutSidenav_content">
         <!-- Nút "Sell" -->
-        <a href="{% url 'sell_crypto' %}"
+        <a href="{% url 'mining_page' %}"
            class="btn btn-success btn-lg"
            style="position: absolute; top: 30px; right: 90px; width: 100px; height: 50px; display: flex; justify-content: center; align-items: center;">
             Excavator
         </a>
 
-        <form method="POST" action="{% url 'mining' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
+        <form method="POST" action="{% url 'authenticity_mine' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
             {% csrf_token %}
             <div class="col-md-7">
                 <label for="inputHeader" class="form-label">Header</label>
-                <input name="header" type="text" class="form-control" id="inputHeader" placeholder="Dự đoán số Nonce">
+                <input name="header" type="number" class="form-control" id="inputHeader" placeholder="Dự đoán số Nonce">
             </div>
+
             <div class="col-md-7">
                 <label for="inputEmail4" class="form-label">Sender</label>
                 <input name="from_send" type="text" class="form-control" id="inputEmail4" placeholder="Người gửi">
+            </div>
+
+            <div class="col-md-7">
+                <label for="inputEmail4" class="form-label">Hash Session</label>
+                <input name="hash_session" type="text" class="form-control" id="hash_session" placeholder="Nhập hash session của phiên giao dịch">
             </div>
 
             {{ form.captcha }}

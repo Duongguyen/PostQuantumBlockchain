@@ -1,8 +1,9 @@
+import json
 import time
 import hashlib
+from datetime import datetime
+
 import requests
-import random
-import string
 
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,66 +12,82 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.utils.timezone import now
+
 from ...form.transaction.form import TransactionForm, CreateUserForm, AccountForm
-from ...models import BlockchainUser, Transaction, Account, New
+from ...models import Account, New, TitlePage, Blockchains, Transaction
 from ..blockchain.create import create_blockchain_use_case
-from ...utils.common.security import mine, check_valid_mine
-from .utils import email_verification_token
-from django.utils import timezone
+from ...sphincs_python.package.sphincs import Sphincs
+from ...utils.common.security import mine, check_valid_mine, hash_mine, check_valid_mine_sph
+from .utils import email_verification_token, select_key
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import check_password
-from django.core.cache import cache
+from django.shortcuts import render
+from ...utils.common.security import SHA256
+from ...utils.common.security import encrypt_aes_256, decrypt_aes_256
+from .utils import sign_transactions
+
+from pqcrypto.pqcrypto.sign.sphincs_sha256_128s_simple import generate_keypair, sign, verify
+from pqcrypto.pqcrypto.config import PDD_SEA, SK_SEA, SK_1, SK_2, SK_3, SK_4, NONCE
+
 
 def render_templates(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.username != 'admin':
         return render(request, 'index.html')
 
 
 def sell_crypto(request):
-    if request.user.is_authenticated:
-        return render(request, 'sell_crypto.html')
+    if request.user.is_authenticated and request.user.username != 'admin':
+        return render(request, 'sell_coin.html')
 
 
 def mine_crypto(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.username != 'admin':
         return render(request, 'mine.html')
 
 
 def base(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.username != 'admin':
         user_not_login = "hidden"
         user_login = "show"
-        context = {'user_not_login': user_not_login,
-                   'user_login': user_login,
-                   # 'evolutions': evolutions
-                   }
-
+        decrypt_key_hex, public_key_hex = select_key(request.user.id)
+        context = {
+            'user_not_login': user_not_login,
+            'user_login': user_login,
+            'public_key': public_key_hex,
+            'private_key': decrypt_key_hex
+        }
         return render(request, 'index.html', context)
     else:
-        user_not_login = "show"
-        user_login = "hidden"
-        # form = RecapchaForm()
-        context = {'user_not_login': user_not_login,
-                   'user_login': user_login,
-                   # "form": form
-                   }
-
-        return render(request, 'login.html', context)
+        return render(request, 'login.html', {'user_not_login': "show", 'user_login': "hidden"})
 
 def login_base(request):
-    if request.user.is_authenticated:
-        # Lấy danh sách tin tức từ cơ sở dữ liệu
-        news_list = New.objects.all().order_by('-id')[:5]  # Lấy 5 tin tức mới nhất
-        return render(request, 'index.html', {'news_list': news_list})
+    if request.user.is_authenticated and request.user.username != 'admin':
+        news_list = New.objects.all().order_by('-id')[:5]
+        title_list = TitlePage.objects.all()
+
+        for title in title_list:
+            title.split_title = title.title.split(' ', 1)
+
+        user_account = Account.objects.get(user_id=request.user.id)
+        decrypt_key_hex, public_key_hex = select_key(request.user.id)
+
+        return render(request, 'index.html', {
+            'news_list': news_list,
+            'title_list': title_list,
+            'username': request.user.username,
+            'user_account': user_account,
+            'public_key': public_key_hex,
+            'private_key': decrypt_key_hex
+        })
 
     if request.method == "POST":
         recaptcha_response = request.POST.get('g-recaptcha-response')
         data = {
-            'secret': '6LdCS4QqAAAAAP54R6_B7rZ8Z00PTqUwehFqHlgu',  # Thay YOUR_SECRET_KEY bằng Secret Key từ Google
+            'secret': '6LdCS4QqAAAAAP54R6_B7rZ8Z00PTqUwehFqHlgu',
             'response': recaptcha_response
         }
         recaptcha_verify_url = "https://www.google.com/recaptcha/api/siteverify"
@@ -86,16 +103,29 @@ def login_base(request):
         user = authenticate(request, username=username_check, password=password_check)
         if user:
             login(request, user)
-            news_list = New.objects.all().order_by('-id')[:5]  # Lấy 5 tin tức mới nhất
-            return render(request, 'index.html', {'news_list': news_list})
+            news_list = New.objects.all().order_by('-id')[:5]
+            title_list = TitlePage.objects.all()
+            for title in title_list:
+                title.split_title = title.title.split(' ', 1)
+
+            user_account = Account.objects.get(user_id=request.user.id)
+            decrypt_key_hex, public_key_hex = select_key(request.user.id)
+            return render(request, 'index.html', {
+                'news_list': news_list,
+                'title_list': title_list,
+                'username': username_check,
+                'user_account': user_account,
+                'public_key': public_key_hex,
+                'private_key': decrypt_key_hex
+            })
         else:
-            messages.info(request, 'user or pass not correct!')
+            messages.info(request, 'User or password is not correct!')
 
     return render(request, 'login.html')
 
 
+
 def news_detail(request, news_id):
-    # Lấy bài viết từ cơ sở dữ liệu, nếu không tìm thấy sẽ trả về 404
     news = get_object_or_404(New, id=news_id)
     user = get_object_or_404(User, id=news.user_id)
     return render(request, 'news_detail.html', {'news_item': news, 'username': user.username})
@@ -104,12 +134,10 @@ def news_detail(request, news_id):
 @login_required
 @csrf_exempt
 def toggle_like(request, news_id):
-    print("x")
     if request.method == "POST":
         news = get_object_or_404(New, id=news_id)
         user_id = request.user.id
 
-        # Kiểm tra xem user đã thích bài viết chưa
         if user_id in news.liked_users:
             news.liked_users.remove(user_id)
             news.like -= 1
@@ -156,9 +184,8 @@ def send_verification_email(user, request):
 
 
 def process_register(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.username != 'admin':
         return render(request, 'index.html')
-
     if request.method == "POST":
         recaptcha_response = request.POST.get('g-recaptcha-response')
         data = {
@@ -197,7 +224,6 @@ def process_register(request):
                 if User.objects.filter(email=email).exists():
                     messages.error(request, "Email already exists!")
                     return render(request, 'sign_up.html', {'form': user_form})
-
                 user = User(
                     username=username,
                     first_name=firstname,
@@ -207,15 +233,30 @@ def process_register(request):
                 )
                 user.set_password(password1)
                 user.save()
+                public_key, secret_key = generate_keypair()
+
+                public_key_hex = public_key.hex()
+                secret_key_hex = secret_key.hex()
+
+                secret_key_bytes = bytes.fromhex(secret_key_hex)
+
+                sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
+                pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
+
+                encrypt_key = encrypt_aes_256(secret_key_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+                encrypt_key_hex = encrypt_key.hex()
+                user_account = User.objects.get(username=username)
                 account = Account(
                     user=user,
-                    address_wallet=hashlib.sha256(username.encode()).hexdigest(),
+                    address_wallet=public_key_hex,
                     birthday=birthday,
                     gender=gender,
                     phone=phone,
                     is_verified=False,
+                    private_key=encrypt_key_hex,
+                    user_id=user_account.id,
                 )
-
+                print("3")
                 account.save()
                 send_verification_email(user, request)
 
@@ -229,26 +270,57 @@ def process_register(request):
     form = CreateUserForm()
     return render(request, 'sign_up.html', {'form': form})
 
-def mining_crypto(request):
+
+def authenticity_mine(request):
     start_time = time.time()
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.username != 'admin':
         if request.method == 'POST':
             form = TransactionForm(request.POST)
             if form.is_valid():
-                timestamp = timezone.now()
-                text_timestamp = str(timestamp)
+                data_session = Transaction.objects.get(hash_session=form['hash_session'].value())
+                created_at_str = str(data_session.created_at)
+
+                created_at_dt = datetime.fromisoformat(created_at_str.split('+')[0])
+
+                formatted_time = created_at_dt.strftime('%Y-%m-%d %H:%M:%S')
                 data = {
                     "from_send": request.user.username,
-                    # "timestamp": text_timestamp
+                    "amount": data_session.amount,
+                    "timestamp": formatted_time
                 }
-                handle = check_valid_mine(data, form['header'].value())
+                handle = check_valid_mine_sph(str(data), int(form['header'].value()))
+                user_info = User.objects.get(username=form['from_send'].value())
+                account_info = Account.objects.get(user_id=user_info.id)
+
                 if handle and form['header'].value():
-                    handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
-                                                                        amount=5,
-                                                                        create_at=timestamp,
-                                                                        destination="",
-                                                                        hash_mine=handle,
-                                                                        user_id=request.user.id)
+                    dt = datetime.fromisoformat(str(now()))
+                    result = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+                    data = account_info.address_wallet + "1" + result
+                    data_bytes = data.encode('utf-8')
+
+                    sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
+                    pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
+                    encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+
+                    signature_hex, data_sign = sign_transactions(encrypt_data, user_info.id)
+
+                    data_block = account_info.address_wallet + ',' + "none" + ',' + "1" + ',' + result
+                    data_bytes_block = data_block.encode('utf-8')
+                    encrypt_data_block = encrypt_aes_256(data_bytes_block, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+
+                    handle_mine_blockchain = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
+                                                        hash_mine=handle,
+                                                        user_id=user_info.id,
+                                                        signature_hex=signature_hex,
+                                                        data=data_sign)
+
+                    # handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
+                    #                                                     amount=5,
+                    #                                                     create_at=result,
+                    #                                                     destination="",
+                    #                                                     hash_mine=handle,
+                    #                                                     user_id=user_info.id)
                     end_time = time.time()
                     print(f"Thời gian chạy: {end_time - start_time} giây")
                     return render(request, 'mine_success.html')
@@ -260,28 +332,9 @@ def mining_crypto(request):
             return render(request, '500.html')
 
 
-# def create_transaction_use_case(request):
-#     if request.user.is_authenticated:
-#         if request.method == 'POST':
-#             form = TransactionForm(request.POST)
-#             a = form['from_send'].value()
-#             get_user = User.objects.get(username=a)
-#             get_detail_user = Account.objects.get(user_id=get_user.id)
-#             if (form.is_valid() and float(form['amount'].value()) <= float(get_detail_user.balance) - 0.1 and
-#                     get_user.check_password(form['pass_check'].value()) and form['amount'].value()):
-#
-#                 form.save()
-#                 handle = create_blockchain_use_case(from_send=form['from_send'].value(),
-#                                                     destination=form['destination'].value(),
-#                                                     amount=form['amount'].value(),
-#                                                     create_at=form['created_at'].value(),
-#                                                     hash_mine="",
-#                                                     user_id=get_user.id)
-#                 return render(request, 'index.html')
-#             else:
-#                 return render(request, '401.html')
-#         else:
-#             return render(request, '500.html')
+def mining_page(request):
+    if request.user.is_authenticated and request.user.username != 'admin':
+        return render(request, 'mining.html')
 
 
 def verify_email(request, uidb64, token):
@@ -299,6 +352,82 @@ def verify_email(request, uidb64, token):
     else:
         messages.error(request, "Liên kết xác thực không hợp lệ hoặc đã hết hạn!")
         return render(request, 'sign_up.html')
+
+
+# @csrf_exempt
+# def mining_crypto(request):
+#     if request.method == "POST":
+#         try:
+#             # NONCE = '00000'
+#             nonce_base = 0
+#             data = json.loads(request.body)
+#             transactions = data['transactions']
+#             block = json.dumps(transactions) + str(nonce_base)
+#             new_hash = hash_mine(block)
+#             print(str(NONCE))
+#             while not new_hash.startswith(str(NONCE)):
+#                 nonce_base += 1
+#                 block = json.dumps(transactions) + str(nonce_base)
+#                 new_hash = SHA256(block)
+#
+#             print(new_hash)
+#             return JsonResponse({"success": True, "nonce": nonce_base})
+#         except Exception as e:
+#             return JsonResponse({"success": False, "error": str(e)})
+#     return JsonResponse({"success": False, "error": "Invalid request"})
+
+
+@csrf_exempt
+def mining_crypto_sph(request):
+    if request.method == "POST":
+        try:
+            # NONCE = '00000'
+            nonce_base = 0
+            data = json.loads(request.body)
+            transactions = data['transactions']
+            block = json.dumps(transactions) + str(nonce_base)
+            new_hash = hash_mine(block)
+            print(str(NONCE))
+            while not new_hash.startswith(str(NONCE)):
+                nonce_base += 1
+                new_hash = hash_mine(block)
+
+            print(new_hash)
+            return JsonResponse({"success": True, "nonce": nonce_base})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
+# @login_required
+# def account_details(request):
+#     public_key, secret_key = generate_keypair()
+#
+#     public_key_hex = public_key.hex()
+#     secret_key_hex = secret_key.hex()
+#
+#     public_key_original = bytes.fromhex(public_key_hex)
+#     secret_key_original = bytes.fromhex(secret_key_hex)
+#
+#     print("Original Public key:", public_key_hex)
+#     print("Original Secret key:", secret_key_hex)
+#
+#     return render(request, 'base.html', {'public_key': public_key_hex, 'private_key': secret_key_hex})
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def account_details(request):
+    public_key, secret_key = generate_keypair()
+
+    public_key_hex = public_key.hex()  # Chuyển đổi sang dạng hex để hiển thị
+    secret_key_hex = secret_key.hex()
+
+    return render(request, 'base.html', {
+        'public_key': public_key_hex,
+        'private_key': secret_key_hex
+    })
+
 
 # def select_balance():
 #     get_balance = BlockchainUser.objects.get(username=form['from_send'].value())

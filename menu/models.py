@@ -7,18 +7,17 @@ from django.contrib.auth.models import User
 
 
 class Transaction(models.Model):
-    header = models.IntegerField(null=True, default=0)
-    from_send = models.CharField(max_length=200, null=False)
-    destination = models.CharField(max_length=200, null=True)
+    header = models.IntegerField(max_length=10, null=True)
+    from_send = models.CharField(max_length=500, null=False)
+    destination = models.CharField(max_length=500, null=True)
     pass_check = models.CharField(max_length=200, null=True)
     amount = models.FloatField(null=True)
-    from_key = models.CharField(max_length=200, null=True)
-    destination_key = models.CharField(max_length=200, null=True)
     created_at = models.DateTimeField(default=timezone.now(), null=True)
     status_sell = models.BooleanField(default=False)
+    hash_session = models.CharField(max_length=100, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.created_at:  # Nếu from_key trống, gán giá trị mặc định
+        if not self.created_at:
             self.created_at = timezone.now()
 
         super().save(*args, **kwargs)
@@ -30,8 +29,8 @@ class Transaction(models.Model):
 class Blockchains(models.Model):
     version = models.FloatField(null=False, default=4.0)
     header = models.IntegerField(null=True, default=0)
-    previous_hash = models.CharField(max_length=200, null=True)
-    hash_blockchain = models.CharField(max_length=200, null=False)
+    previous_hash = models.CharField(max_length=1000, null=True)
+    hash_blockchain = models.CharField(max_length=1000, null=False)
     created_at = models.DateTimeField(default=timezone.now(), null=True)
 
     def __str__(self):
@@ -46,22 +45,22 @@ class Account(models.Model):
         max_length=6
     )
     balance = models.FloatField(null=False, default=0)
-    address_wallet = models.CharField(max_length=200, null=False, default=get_uuid4())
+    address_wallet = models.CharField(max_length=1000, null=True)
     is_verified = models.BooleanField(default=False)
+    private_key = models.CharField(max_length=1000, null=True)
 
     def __str__(self):
-        return self.user.username
+        return self.address_wallet
 
 
 class New(models.Model):
-    user_id = models.IntegerField(null=False, unique=True)
+    user_id = models.IntegerField(null=False, unique=False)
     title = models.CharField(max_length=300)
     content = models.TextField(max_length=2000)
     like = models.IntegerField(default=0)
     share = models.IntegerField(default=0)
     tag = models.CharField(max_length=50)
     summary = models.CharField(max_length=50)
-    liked_users = models.JSONField(default=list)
 
     def __str__(self):
         return self.title

@@ -4,6 +4,7 @@ import json
 from menu.models import Blockchains
 
 
+
 class Block:
     def __init__(self, data):
         self.data = data
@@ -89,6 +90,10 @@ class Blockchain:
                 if transfer["to"] == person:
                     balance = balance + transfer["amount"]
         return balance
+
+
+
+
 
 # blockchain = Blockchain("Duong")
 # blockchain.add_block([

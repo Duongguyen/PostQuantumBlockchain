@@ -3,7 +3,7 @@
 {% block verification %}
 <div id="layoutSidenav">
     <div id="layoutSidenav_content">
-        <form method="POST" action="{% url 'otp_verification_page' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
+        <form method="POST" action="{% url 'otp_verification_page' result %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
             {% csrf_token %}
             <div class="col-md-7">
                 <label for="otpCode" class="form-label">Enter OTP</label>
@@ -14,18 +14,6 @@
             </div>
         </form>
 
-        <!-- Display messages -->
-        {% if messages %}
-        <div class="mt-3">
-            {% for message in messages %}
-            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Error message -->
         {% if error_message %}
         <div class="alert alert-danger mt-3" role="alert">
             {{ error_message }}

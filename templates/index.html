@@ -1,39 +1,103 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <div class="container-fluid">
-  <div class="position-fixed" style="top: 35%; right: 9%; transform: translateY(-50%); width: 500px;">
-    <div id="crypto-prices" class="card mb-4">
-      <div class="card-header">
-        <h5>Popular</h5>
-      </div>
-      <div class="card-body">
-        <ul id="coin-list" class="list-group">
-          <!-- Nội dung coin -->
-        </ul>
-      </div>
+  <div class="row">
+    <!-- Cột bên trái: tiêu đề -->
+    <div class="col-md-6 vh-100" style="margin-top: 3.5cm; margin-left: 5.3cm;">
+        <div id="main-title" class="text-center my-5" style="padding: 20px; word-wrap: break-word; word-break: break-word; white-space: normal;">
+            {% for title in title_list %}
+            <h1 class="fw-bold title-item"
+                style="font-size: 4rem; color: #000000; font-family: 'Poppins', sans-serif;">
+                <!-- Phân tách tiêu đề với màu sắc khác nhau -->
+                <span style="color: #000000; font-family: 'Poppins', sans-serif;">{{ title.split_title.0 }}</span><br>
+                <span style="color: #FFD700; font-family: 'Poppins', sans-serif;">{{ title.split_title.1 }}</span>
+            </h1>
+              <a href="{{ title.link }}"
+                 class="btn mt-3"
+                 style="width: 5cm; height: 1.5cm; font-size: 1.2rem; font-family: 'Times New Roman', Times, serif; background-color: black; color: yellow; text-align: center; line-height: 1.2cm; display: inline-block; text-decoration: none; border-radius: 5px;">
+                  Bắt đầu ngay
+              </a>
+            {% endfor %}
+        </div>
     </div>
 
-    <!-- Thêm phần hiển thị tin tức -->
-    <div id="news-section" class="card">
-      <div class="card-header">
-        <h5>Tin tức</h5>
-      </div>
-      <div class="card-body">
-        <ul class="list-group">
-          {% for news in news_list %}
-          <li class="list-group-item">
-            <a href="#">{{ news.title }}</a>
-          <p>
-            <a href="{% url 'news_detail' news.id %}" class="text-decoration-none">
-              {{ news.summary }}
-            </a>
-          </p>
-          </li>
-          {% endfor %}
-        </ul>
+    <!-- Cột bên phải: Popular và Tin tức -->
+    <div class="col-md-6">
+      <div class="position-fixed" style="top: 50%; right: 5%; transform: translateY(-50%); width: 500px;">
+        <!-- Popular Section -->
+        <div id="crypto-prices" class="card mb-4">
+          <div class="card-header d-flex align-items-center">
+            <h5 class="mb-0 text-start" style="width: 100%; font-weight: bold;">Popular</h5>
+          </div>
+          <div class="card-body">
+            <ul id="coin-list" class="list-group">
+              <!-- Nội dung coin -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- News Section -->
+        <div id="news-section" class="card">
+          <div class="card-header">
+            <h5>News</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              {% for news in news_list %}
+                <li class="list-group-item">
+                  <p>
+                    <a href="{% url 'news_detail' news.id %}" class="text-decoration-none">
+                      {{ news.summary }}
+                    </a>
+                  </p>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %}
+
+<!-- Inline Style -->
+<style>
+  .card-header h5 {
+    margin: 0;
+    text-align: left; /* Đẩy chữ "Popular" về góc trái */
+    color: #333; /* Tùy chỉnh màu chữ */
+  }
+
+  /* Tùy chỉnh các tiêu đề trong giao diện */
+  .title-item {
+    font-size: 4rem;
+    color: #000;
+  }
+
+  .btn {
+    font-weight: bold;
+    border: none;
+  }
+
+  #coin-list, .list-group {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  #crypto-prices .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.title-item').forEach(function (title) {
+    const words = title.dataset.title.split(' '); // Lấy nội dung tiêu đề
+    for (let i = 3; i < words.length; i += 4) {
+      words[i] = '<br>' + words[i]; // Thêm <br> sau mỗi 3 từ
+    }
+    title.innerHTML = words.join(' '); // Cập nhật nội dung
+  });
+</script>
+{% endblock content %}

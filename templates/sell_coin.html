@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 {% extends 'base.html' %}
 {% load static %}
-{% block transaction %}
+{% block sell_coin %}
 <div id="layoutSidenav">
     <div id="layoutSidenav_content">
         <form method="POST" action="{% url 'transaction' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
             {% csrf_token %}
             <div class="col-md-7">
-                <label for="inputEmail4" class="form-label">Sender</label>
-                <input name="from_send" type="text" class="form-control" id="inputEmail4">
+                <label for="inputEmail4" class="form-label">Address Wallet</label>
+                <input name="destination" type="text" class="form-control" id="inputEmail4">
             </div>
 
             <div class="col-md-7">
@@ -30,6 +30,7 @@
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Sell</button>
             </div>
+
             {% if messages %}
                 <div class="col-md-7">
                     <div class="alert alert-success text-center mt-4">
@@ -37,8 +38,8 @@
                     </div>
                 </div>
             {% endif %}
+
         </form>
     </div>
-
 </div>
-{% endblock transaction %}
+{% endblock sell_coin %}

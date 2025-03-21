@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,7 +13,7 @@
     <!-- Custom CSS -->
     <style>
         body {
-            background: #f7f7f7;
+            background: #f0f2f5;
             background-image: url('https://www.toptal.com/designers/subtlepatterns/patterns/diagonal-stripes.png');
             background-repeat: repeat;
             height: 100vh;
@@ -25,26 +24,40 @@
         }
 
         .card {
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px);
         }
 
         .form-label {
             font-weight: 500;
             font-size: 18px;
+            color: #333;
         }
 
         .form-control {
-            border-radius: 10px;
+            border-radius: 25px;
             padding: 15px;
             font-size: 16px;
+            border: 2px solid #ccc;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #2575fc;
+            box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
         }
 
         .btn-primary {
             background: #2575fc;
             border: none;
             border-radius: 50px;
-            padding: 10px 30px;
+            padding: 12px 35px;
             font-size: 18px;
             transition: background 0.3s;
         }
@@ -57,7 +70,7 @@
             background: #6c757d;
             border: none;
             border-radius: 50px;
-            padding: 10px 30px;
+            padding: 12px 35px;
             font-size: 18px;
             transition: background 0.3s;
         }
@@ -67,7 +80,7 @@
         }
 
         .card-body img {
-            border-radius: 15px;
+            border-radius: 20px;
         }
 
         .h1 {
@@ -85,9 +98,28 @@
             border: 1px solid #f5c6cb;
             text-align: center;
         }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .register-link a {
+            color: #2575fc;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
-
 <body>
     {% block register %}
     <section class="vh-100">
@@ -113,8 +145,7 @@
 
                                         {{ form.captcha }}
                                         {% for error in form.captcha.errors %}
-
-                                        <p>{{ error }}</p>
+                                            <p>{{ error }}</p>
                                         {% endfor %}
 
                                         <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
@@ -125,24 +156,22 @@
                                     </form>
 
                                     <!-- Registration button -->
-                                    <div class="d-flex justify-content-center">
+                                    <div class="register-link">
                                         <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">Register</a>
                                     </div>
 
-                                {% if messages %}
-                                    {% for message in messages %}
-                                        <div class="alert alert-danger">
-                                            {{ message }}
-                                        </div>
-                                    {% endfor %}
-                                {% endif %}
-
+                                    {% if messages %}
+                                        {% for message in messages %}
+                                            <div class="alert alert-danger">
+                                                {{ message }}
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
 
                                 <!-- Image section -->
                                 <div class="col-md-6 col-lg-7 d-flex align-items-center order-1 order-lg-2">
-                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
-                                        class="img-fluid" alt="Sample image">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp" class="img-fluid" alt="Sample image">
                                 </div>
                             </div>
                         </div>
@@ -159,5 +188,4 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
-
 </html>
