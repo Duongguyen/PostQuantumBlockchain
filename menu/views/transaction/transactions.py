@@ -107,23 +107,21 @@ def otp_verification_view(request, result):
 
                         transaction = form.save(commit=False)
 
-                        hash_session_transaction = SHA256(get_detail_user.address_wallet + str(transaction.amount) + result)
+                        hash_session_transaction = SHA256(form['destination'].value() + str(transaction.amount) + result)
                         transaction.from_send = get_detail_user.address_wallet
                         transaction.destination = form['destination'].value()
                         transaction.hash_session = hash_session_transaction
                         transaction.created_at = result
                         transaction.save()
 
-                        data = get_detail_user.address_wallet + str(transaction.amount) + result
-                        data_bytes = data.encode('utf-8')
-
+                        data_block = transaction.from_send + ',' + transaction.destination + ',' + str(transaction.amount) + ',' + result + ',' + "0"
+                        data_bytes = data_block.encode('utf-8')
                         sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
                         pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
                         encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
 
                         signature_hex, data_sign = sign_transactions(encrypt_data, get_user_send.id)
 
-                        data_block = transaction.from_send + ',' + transaction.destination + ',' + str(transaction.amount) + ',' + result
                         data_bytes_block = data_block.encode('utf-8')
                         encrypt_data_block = encrypt_aes_256(data_bytes_block, sk_sea_bytes_hex, pdd_sea_bytes_hex)
 

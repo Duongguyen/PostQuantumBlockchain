@@ -3,9 +3,7 @@ import json
 import math
 
 from menu.models import Blockchains, Transaction
-from datetime import datetime
-from pqcrypto.pqcrypto.config import PUBLIC_KEY, SECRET_KEY, NONCE, SK_1, SK_2, SK_3, SK_4
-from pqcrypto.pqcrypto.sign.sphincs_sha256_256f_robust import generate_keypair, sign, verify
+from pqcrypto.pqcrypto.config import NONCE, SK_1, SK_2, SK_3, SK_4
 from menu.sphincs_python.package.sphincs import Sphincs, prf_msg, hash_msg
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -18,6 +16,7 @@ class Block:
         self.hash = ""
         self.create_at = ""
         self.destination = ""
+        self.header = ""
 
 
 def hash(block):
@@ -100,34 +99,6 @@ def mine(transactions, timestamp: str):
 
     return False
 
-# def mine_sphincs(transactions, timestamp: str):
-#     results = Blockchains.objects.all().values().last()
-#     block = json.dumps(transactions) + str(results['nonce']) + timestamp
-#     new_hash = SHA256(block)
-#     while not new_hash.startswith(NONCE):
-#         results['nonce'] += 1
-#         block = json.dumps(transactions) + str(results['nonce']) + timestamp
-#         new_hash = SHA256(block)
-#         data = json.dumps(block.data) + block.prev_hash + block.create_at
-#         data = data.encode('utf-8')
-#         variable_sph = Sphincs()
-#         bytes_sk_1 = bytes.fromhex(SK_1)
-#         bytes_sk_2 = bytes.fromhex(SK_2)
-#         bytes_sk_3 = bytes.fromhex(SK_3)
-#         bytes_sk_4 = bytes.fromhex(SK_4)
-#
-#         opt = bytes(variable_sph._n)
-#         r = prf_msg(bytes_sk_2, opt, data, variable_sph._n)
-#         size_md = math.floor((variable_sph._k * variable_sph._a + 7) / 8)
-#         size_idx_tree = math.floor((variable_sph._h - variable_sph._h // variable_sph._d + 7) / 8)
-#         size_idx_leaf = math.floor((variable_sph._h // variable_sph._d + 7) / 8)
-#         digest = hash_msg(r, bytes_sk_3, bytes_sk_4, data, size_md + size_idx_tree + size_idx_leaf)
-#
-#     if results['header'] == results['nonce']:
-#         return True
-#
-#     return False
-
 
 def check_valid_mine(transactions, nonce: int):
     print(transactions)
@@ -141,10 +112,11 @@ def check_valid_mine(transactions, nonce: int):
 
 def check_valid_mine_sph(transactions, nonce: int):
     block = json.dumps(transactions) + str(nonce)
-    new_hash = SHA256(block)
-    print(str(NONCE))
+    new_hash = hash_mine(block)
+    # print(str(NONCE))
+    print(f"Mã băm kiểm tra: {new_hash}")
+    # print(block)
     if new_hash.startswith(str(NONCE)):
-        new_hash = hash_mine(block)
         return new_hash
     return False
 
@@ -157,7 +129,7 @@ class Blockchain:
         block = Block(data)
         check = check_blockchain()
         results = Blockchains.objects.all().values().last()
-        print(data)
+        # print(data)
         if check:
             if data[0]["destination"] == "none":
                 value = results['hash_blockchain']
@@ -165,12 +137,14 @@ class Blockchain:
                 block.prev_hash = value
                 block.hash = data[0]["hash_mine"]
                 block.create_at = data[0]["create_at"]
+                block.header = data[0]["header"]
                 self.chain.append(block)
             else:
                 value = results['hash_blockchain']
                 block.destination = data[0]["destination"]
                 block.prev_hash = value
                 block.hash = str(NONCE) + hash(block)
+                # print("So nonce", NONCE)
                 block.create_at = data[0]["create_at"]
                 self.chain.append(block)
         else:
@@ -182,26 +156,36 @@ class Blockchain:
 
     def get_blockchain(self):
         transaction = Transaction.objects.all().values().last()
-        print(len(self.chain))
+        # print(len(self.chain))
         for block in self.chain:
-            print("Data:", transaction)
-            print("Previous hash:", block.prev_hash)
-            print("Hash:", block.hash)
+            # print("Data:", transaction)
+            # print("Previous hash:", block.prev_hash)
+            # print("Hash:", block.hash)
             results = Blockchains.objects.last()
-            if block.destination == 'none':
+            if block.destination == 'none' or results is None:
+                # print(block.hash)
+                results = Blockchains.objects.last()
+                results.header = block.header
+                results.save()
                 block_data = Blockchains(
                     created_at=block.create_at,
                     previous_hash=block.prev_hash,
                     hash_blockchain=block.hash
                 )
                 block_data.save()
+                print(f"Mã băm trước đó: {block.prev_hash}")
+                print(f"Mã băm giao dịch: {block.hash}")
+                print("DONE: ")
                 return
-            results = Blockchains.objects.last()
+
             results = Blockchains.objects.last()
             results.created_at = block.create_at
             results.previous_hash = block.prev_hash
             results.hash_blockchain = block.hash
             results.save()
+
+            print(f"Mã băm trước đó: {block.prev_hash}")
+            print(f"Mã băm giao dịch: {block.hash}")
             print("DONE: ")
 
     def is_valid(self):
@@ -219,8 +203,8 @@ class Blockchain:
 
     def get_balance(self, person):
         balance = 0
-        print(self.chain)
-        print(person)
+        # print(self.chain)
+        # print(person)
         for block in self.chain:
             if type(block.data) != list:
                 continue
@@ -265,6 +249,35 @@ def decrypt_aes_256(ciphertext: bytes, key: bytes, iv: bytes) -> bytes:
     decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
     pad_len = decrypted_padded[-1]  # Lấy số byte padding
     return decrypted_padded[:-pad_len]  # Loại bỏ padding
+
+
+# def mine_sphincs(transactions, timestamp: str):
+#     results = Blockchains.objects.all().values().last()
+#     block = json.dumps(transactions) + str(results['nonce']) + timestamp
+#     new_hash = SHA256(block)
+#     while not new_hash.startswith(NONCE):
+#         results['nonce'] += 1
+#         block = json.dumps(transactions) + str(results['nonce']) + timestamp
+#         new_hash = SHA256(block)
+#         data = json.dumps(block.data) + block.prev_hash + block.create_at
+#         data = data.encode('utf-8')
+#         variable_sph = Sphincs()
+#         bytes_sk_1 = bytes.fromhex(SK_1)
+#         bytes_sk_2 = bytes.fromhex(SK_2)
+#         bytes_sk_3 = bytes.fromhex(SK_3)
+#         bytes_sk_4 = bytes.fromhex(SK_4)
+#
+#         opt = bytes(variable_sph._n)
+#         r = prf_msg(bytes_sk_2, opt, data, variable_sph._n)
+#         size_md = math.floor((variable_sph._k * variable_sph._a + 7) / 8)
+#         size_idx_tree = math.floor((variable_sph._h - variable_sph._h // variable_sph._d + 7) / 8)
+#         size_idx_leaf = math.floor((variable_sph._h // variable_sph._d + 7) / 8)
+#         digest = hash_msg(r, bytes_sk_3, bytes_sk_4, data, size_md + size_idx_tree + size_idx_leaf)
+#
+#     if results['header'] == results['nonce']:
+#         return True
+#
+#     return False
 
 
 # Ví dụ sử dụng

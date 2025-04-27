@@ -19,9 +19,12 @@ def sign_transactions(encrypt_data: bytes, user_id):
 
     decrypt_key_hex, public_key_hex = select_key(user_id)
     sign_key = bytes.fromhex(decrypt_key_hex)
-
     signature_based = sign(sign_key, decrypt_data)
     signature_hex = signature_based
+
+    print(f"Data trước khi mã hóa: {decrypt_data.decode('utf-8')}")
+    print(f"Chữ ký số: {signature_hex.hex()}")
+    print(f"Data đã mã hóa: {encrypt_data.hex()}")
     return signature_hex, encrypt_data
 
 def verify_sign_transactions(signature_hex, data_bytes, user_id):
@@ -32,7 +35,8 @@ def verify_sign_transactions(signature_hex, data_bytes, user_id):
 
     public_key_from_hex = bytes.fromhex(public_key_hex)
     signature_verify = verify(public_key_from_hex, decrypt_data, signature_hex)
-    print(signature_verify)
+    print(f"Giải mã dữ liệu đã mã: {decrypt_data.decode('utf-8')}")
+    print(f"Kết quả xác thực chữ ký số: {signature_verify}")
     return signature_verify
 
 def select_key(user_id):

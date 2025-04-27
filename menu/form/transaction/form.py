@@ -19,6 +19,7 @@ class TransactionForm(forms.ModelForm):
         self.fields['header'].required = False
         self.fields['status_sell'].required = False
         self.fields['hash_session'].required = False
+        self.fields['destination'].required = False
 
 
 class CreateUserForm(UserCreationForm):

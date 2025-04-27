@@ -7,7 +7,7 @@
         {% csrf_token %}
         <div class="mb-3" style="top: 3cm;">
             <label for="transactions" class="form-label">Transactions (JSON Format):</label>
-            <textarea class="form-control" id="transactions" name="transactions" rows="10" style="font-size: 18px; padding: 10px;" placeholder='[{ "from_send": "Alice", "amount": 10.5, "timestamp": "YYYY-MM-DD HH:MM:SS"}]' required></textarea>
+            <textarea class="form-control" id="transactions" name="transactions" rows="10" style="font-size: 18px; padding: 10px;" placeholder="{'from_send': 'b6d90753bde2c1d3d31839e0a4cd03933fa2a90bf80f18e0b6e5519fbb29d91f', 'amount': 1.0, 'timestamp': '2025-03-23 04:11:40'}" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary w-100">Start Mining</button>
     </form>

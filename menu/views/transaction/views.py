@@ -25,13 +25,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from ...utils.common.security import SHA256
 from ...utils.common.security import encrypt_aes_256, decrypt_aes_256
 from .utils import sign_transactions
 
 from pqcrypto.pqcrypto.sign.sphincs_sha256_128s_simple import generate_keypair, sign, verify
-from pqcrypto.pqcrypto.config import PDD_SEA, SK_SEA, SK_1, SK_2, SK_3, SK_4, NONCE
+from pqcrypto.pqcrypto.config import PDD_SEA, SK_SEA, NONCE
 
 
 def render_templates(request):
@@ -284,34 +282,31 @@ def authenticity_mine(request):
 
                 formatted_time = created_at_dt.strftime('%Y-%m-%d %H:%M:%S')
                 data = {
-                    "from_send": request.user.username,
+                    "from_send": form['from_send'].value(),
                     "amount": data_session.amount,
                     "timestamp": formatted_time
                 }
                 handle = check_valid_mine_sph(str(data), int(form['header'].value()))
-                user_info = User.objects.get(username=form['from_send'].value())
-                account_info = Account.objects.get(user_id=user_info.id)
+                account_info = Account.objects.get(user_id=request.user.id)
 
                 if handle and form['header'].value():
                     dt = datetime.fromisoformat(str(now()))
                     result = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-                    data = account_info.address_wallet + "1" + result
-                    data_bytes = data.encode('utf-8')
+                    data_block = account_info.address_wallet + ',' + "none" + ',' + "1" + ',' + result + ',' + form['header'].value()
+                    data_bytes = data_block.encode('utf-8')
 
                     sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
                     pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
                     encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
 
-                    signature_hex, data_sign = sign_transactions(encrypt_data, user_info.id)
+                    signature_hex, data_sign = sign_transactions(encrypt_data, request.user.id)
 
-                    data_block = account_info.address_wallet + ',' + "none" + ',' + "1" + ',' + result
-                    data_bytes_block = data_block.encode('utf-8')
-                    encrypt_data_block = encrypt_aes_256(data_bytes_block, sk_sea_bytes_hex, pdd_sea_bytes_hex)
-
+                    # data_bytes_block = data_block.encode('utf-8')
+                    encrypt_data_block = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
                     handle_mine_blockchain = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
                                                         hash_mine=handle,
-                                                        user_id=user_info.id,
+                                                        user_id=request.user.id,
                                                         signature_hex=signature_hex,
                                                         data=data_sign)
 
@@ -322,7 +317,7 @@ def authenticity_mine(request):
                     #                                                     hash_mine=handle,
                     #                                                     user_id=user_info.id)
                     end_time = time.time()
-                    print(f"Thời gian chạy: {end_time - start_time} giây")
+                    # print(f"Thời gian chạy: {end_time - start_time} giây")
                     return render(request, 'mine_success.html')
                 else:
                     return render(request, '401.html')
@@ -390,9 +385,13 @@ def mining_crypto_sph(request):
             print(str(NONCE))
             while not new_hash.startswith(str(NONCE)):
                 nonce_base += 1
+                block = json.dumps(transactions) + str(nonce_base)
                 new_hash = hash_mine(block)
-
-            print(new_hash)
+            #     print(nonce_base)
+            #     print(new_hash)
+            #     print(block)
+            #
+            # print(new_hash)
             return JsonResponse({"success": True, "nonce": nonce_base})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
