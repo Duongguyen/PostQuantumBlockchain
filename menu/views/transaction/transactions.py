@@ -49,8 +49,6 @@ def create_transaction_use_case(request):
                 get_destination = Account.objects.get(address_wallet=form['destination'].value())
             except User.DoesNotExist:
                 return render(request, '401.html', {'error': 'User does not exist.'})
-            print(get_destination.address_wallet)
-            print(get_detail_user.address_wallet)
 
             if (form.is_valid() and
                     float(form['amount'].value()) <= float(get_detail_user.balance) - 0.1 and
@@ -87,6 +85,10 @@ def create_transaction_use_case(request):
 
 
 def otp_verification_view(request, result):
+    if not result:
+        messages.error(request, "Invalid session or missing transaction result.")
+        return redirect('transaction_page', result='default')  # hoặc trang safe
+
     if request.user.is_authenticated:
         if request.method == 'POST':
             otp_input = request.POST.get('otp_code')
@@ -95,16 +97,13 @@ def otp_verification_view(request, result):
             time_remaining = (expiration_time - now()).total_seconds() if expiration_time else 0
 
             if cached_otp and otp_input == cached_otp:
+                # Xử lý giao dịch như code cũ của bạn
                 transaction_data = request.session.get('pending_transaction')
                 if transaction_data:
                     form = TransactionForm(transaction_data)
                     if form.is_valid():
-                        # from_send_username = request.user.username
                         get_user_send = User.objects.get(username=request.user.username)
-                        # get_destination_receiver = User.objects.get(username=form['destination'].value())
                         get_detail_user = Account.objects.get(user_id=get_user_send.id)
-                        # from_key_value = get_detail_user.address_wallet
-
                         transaction = form.save(commit=False)
 
                         hash_session_transaction = SHA256(form['destination'].value() + str(transaction.amount) + result)
@@ -125,37 +124,44 @@ def otp_verification_view(request, result):
                         data_bytes_block = data_block.encode('utf-8')
                         encrypt_data_block = encrypt_aes_256(data_bytes_block, sk_sea_bytes_hex, pdd_sea_bytes_hex)
 
-                        handle = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
-                                                            hash_mine="",
-                                                            user_id=get_user_send.id,
-                                                            signature_hex=signature_hex,
-                                                            data=data_sign)
+                        handle = create_blockchain_use_case(
+                            encrypt_data_block=encrypt_data_block,
+                            hash_mine="",
+                            user_id=get_user_send.id,
+                            signature_hex=signature_hex,
+                            data=data_sign
+                        )
                         if handle:
                             cache.delete(f"otp_{request.user.id}")
                             cache.delete(f"otp_{request.user.id}_expiration")
                             alert = "Transaction completed, Let's start the next transaction"
-                            messages.success(request, "Transaction completed, Let's start the next transaction")
+                            messages.success(request, alert)
                             return render(request, 'sell_coin.html', {"messages": alert})
-
-                        alert = "Transaction failed, please try again"
-                        messages.success(request, "Transaction failed, please try again")
-                        return render(request, 'sell_coin.html', {"messages": alert})
-
+                        else:
+                            alert = "Transaction failed, please try again"
+                            messages.error(request, alert)
+                            return render(request, 'sell_coin.html', {"messages": alert})
                 messages.error(request, "Error processing the transaction.")
-                return redirect('transaction_page', {"result": result})
+                return redirect('transaction_page', result=result)
 
             elif time_remaining > 0:
-                error_message = f"Invalid OTP. Time remaining: {int(time_remaining)} seconds."
+                # OTP sai nhưng vẫn còn thời gian
+                error_message = "OTP is incorrect, please try again."
+                return render(request, 'otp_verification.html', {'error_message': error_message, 'result': result})
+
             else:
-                error_message = "OTP has expired. Please request a new transaction."
+                # Hết thời gian
                 cache.delete(f"otp_{request.user.id}")
                 cache.delete(f"otp_{request.user.id}_expiration")
-                return redirect('transaction_page', {"result": result})
+                messages.error(request, "OTP đã hết hạn. Vui lòng yêu cầu giao dịch mới.")
+                return redirect('transaction_page', result=result)
 
-            # Render the page with error message
-            return render(request, 'otp_verification.html', {'error_message': error_message})
-
+        # Nếu GET request
         return render(request, 'otp_verification.html', {"result": result})
+
+    # Nếu chưa đăng nhập
+    messages.error(request, "You must be logged in to verify OTP.")
+    return redirect('login')
 
 @login_required
 def pending_transactions_view(request):

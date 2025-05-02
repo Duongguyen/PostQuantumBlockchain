@@ -1,7 +1,7 @@
 import json
 import time
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
@@ -27,9 +27,12 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from ...utils.common.security import encrypt_aes_256, decrypt_aes_256
 from .utils import sign_transactions
+from django.core.cache import cache
 
 from pqcrypto.pqcrypto.sign.sphincs_sha256_128s_simple import generate_keypair, sign, verify
 from pqcrypto.pqcrypto.config import PDD_SEA, SK_SEA, NONCE
+
+from .transactions import generate_otp
 
 
 def render_templates(request):
@@ -275,56 +278,169 @@ def authenticity_mine(request):
         if request.method == 'POST':
             form = TransactionForm(request.POST)
             if form.is_valid():
-                data_session = Transaction.objects.get(hash_session=form['hash_session'].value())
-                created_at_str = str(data_session.created_at)
+                otp = generate_otp()
+                expiration_time = now() + timedelta(minutes=5)
 
-                created_at_dt = datetime.fromisoformat(created_at_str.split('+')[0])
+                cache.set(f"otp_{request.user.id}", otp, timeout=300)
+                cache.set(f"otp_{request.user.id}_expiration", expiration_time, timeout=300)
 
-                formatted_time = created_at_dt.strftime('%Y-%m-%d %H:%M:%S')
-                data = {
-                    "from_send": form['from_send'].value(),
-                    "amount": data_session.amount,
-                    "timestamp": formatted_time
-                }
-                handle = check_valid_mine_sph(str(data), int(form['header'].value()))
-                account_info = Account.objects.get(user_id=request.user.id)
+                dt = datetime.fromisoformat(str(now()))
+                result = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-                if handle and form['header'].value():
-                    dt = datetime.fromisoformat(str(now()))
-                    result = dt.strftime("%Y-%m-%d %H:%M:%S")
+                print(form['from_send'].value())
 
-                    data_block = account_info.address_wallet + ',' + "none" + ',' + "1" + ',' + result + ',' + form['header'].value()
-                    data_bytes = data_block.encode('utf-8')
+                get_user_account = Account.objects.get(address_wallet=form['from_send'].value())
+                get_user = User.objects.get(id=get_user_account.user_id)
 
-                    sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
-                    pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
-                    encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+                send_mail(
+                    subject="Your OTP for Mine Authentication",
+                    message=f"Your OTP is: {otp}. It will expire in 5 minutes."
+                            f"Nonce number: {form['header'].value()}, "
+                            f"Address to receive rewards: {form['from_send'].value()}, "
+                            f"hash_session: {form['hash_session'].value()}",
+                    from_email="bitcoinvietnam1811@gmail.com",
+                    recipient_list=[get_user.email],
+                )
 
-                    signature_hex, data_sign = sign_transactions(encrypt_data, request.user.id)
+                request.session['pending_transaction'] = form.cleaned_data
 
-                    # data_bytes_block = data_block.encode('utf-8')
-                    encrypt_data_block = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
-                    handle_mine_blockchain = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
-                                                        hash_mine=handle,
-                                                        user_id=request.user.id,
-                                                        signature_hex=signature_hex,
-                                                        data=data_sign)
-
-                    # handle_mine_blockchain = create_blockchain_use_case(from_send=form['from_send'].value(),
-                    #                                                     amount=5,
-                    #                                                     create_at=result,
-                    #                                                     destination="",
-                    #                                                     hash_mine=handle,
-                    #                                                     user_id=user_info.id)
-                    end_time = time.time()
-                    # print(f"Thời gian chạy: {end_time - start_time} giây")
-                    return render(request, 'mine_success.html')
-                else:
-                    return render(request, '401.html')
+                return redirect('otp_verification_mine')
             else:
-                return render(request, '401.html')
+                return render(request, '401.html', {'error': 'Invalid transaction details.'})
         else:
             return render(request, '500.html')
+    return redirect('login')
+
+
+def otp_verification_mine(request):
+    if request.user.is_authenticated and request.user.username != 'admin':
+        print("000")
+        if request.method == 'POST':
+            print("111")
+            otp_input = request.POST.get('otp_code')
+            cached_otp = cache.get(f"otp_{request.user.id}")
+            expiration_time = cache.get(f"otp_{request.user.id}_expiration")
+            time_remaining = (expiration_time - now()).total_seconds() if expiration_time else 0
+
+            if cached_otp and otp_input == cached_otp:
+                print("222")
+                transaction_data = request.session.get('pending_transaction')
+                if transaction_data:
+                    form = TransactionForm(transaction_data)
+                    if form.is_valid():
+                        data_session = Transaction.objects.get(hash_session=form['hash_session'].value())
+                        created_at_str = str(data_session.created_at)
+
+                        created_at_dt = datetime.fromisoformat(created_at_str.split('+')[0])
+
+                        formatted_time = created_at_dt.strftime('%Y-%m-%d %H:%M:%S')
+                        data = {
+                            "from_send": form['from_send'].value(),
+                            "amount": data_session.amount,
+                            "timestamp": formatted_time
+                        }
+                        print(data)
+                        handle = check_valid_mine_sph(str(data), int(form['header'].value()))
+                        account_info = Account.objects.get(user_id=request.user.id)
+
+                        if handle and form['header'].value():
+                            print("333")
+                            dt = datetime.fromisoformat(str(now()))
+                            result = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+                            data_block = account_info.address_wallet + "," + "none" + "," + "1" + "," + result + "," + str(form['header'].value())
+                            data_bytes = data_block.encode('utf-8')
+
+                            sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
+                            pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
+                            encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+
+                            signature_hex, data_sign = sign_transactions(encrypt_data, request.user.id)
+
+                            # data_bytes_block = data_block.encode('utf-8')
+                            encrypt_data_block = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+                            handle_mine_blockchain = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
+                                                                hash_mine=handle,
+                                                                user_id=request.user.id,
+                                                                signature_hex=signature_hex,
+                                                                data=data_sign)
+
+                            end_time = time.time()
+                            # print(f"Thời gian chạy: {end_time - start_time} giây")
+                            return render(request, 'mine_success.html')
+                        else:
+                            return render(request, '401.html')
+                    else:
+                        return render(request, '401.html')
+                else:
+                    return render(request, '500.html')
+
+            elif time_remaining > 0:
+                # OTP sai nhưng vẫn còn thời gian
+                error_message = "OTP is incorrect, please try again."
+                return render(request, 'otp_verification_mine.html', {'error_message': error_message})
+
+            else:
+                # Hết thời gian
+                cache.delete(f"otp_{request.user.id}")
+                cache.delete(f"otp_{request.user.id}_expiration")
+                messages.error(request, "OTP đã hết hạn. Vui lòng yêu cầu giao dịch mới.")
+                #sua lai toan bo redirect
+                return redirect('transaction_page')
+
+        return render(request, 'otp_verification_mine.html')
+    return render(request, 'login.html')
+
+# def authenticity_mine(request):
+#     start_time = time.time()
+#     if request.user.is_authenticated and request.user.username != 'admin':
+#         if request.method == 'POST':
+#             form = TransactionForm(request.POST)
+#             if form.is_valid():
+#                 data_session = Transaction.objects.get(hash_session=form['hash_session'].value())
+#                 created_at_str = str(data_session.created_at)
+#
+#                 created_at_dt = datetime.fromisoformat(created_at_str.split('+')[0])
+#
+#                 formatted_time = created_at_dt.strftime('%Y-%m-%d %H:%M:%S')
+#                 data = {
+#                     "from_send": form['from_send'].value(),
+#                     "amount": data_session.amount,
+#                     "timestamp": formatted_time
+#                 }
+#                 handle = check_valid_mine_sph(str(data), int(form['header'].value()))
+#                 account_info = Account.objects.get(user_id=request.user.id)
+#
+#                 if handle and form['header'].value():
+#                     dt = datetime.fromisoformat(str(now()))
+#                     result = dt.strftime("%Y-%m-%d %H:%M:%S")
+#
+#                     data_block = account_info.address_wallet + ',' + "none" + ',' + "1" + ',' + result + ',' + form['header'].value()
+#                     data_bytes = data_block.encode('utf-8')
+#
+#                     sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
+#                     pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
+#                     encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+#
+#                     signature_hex, data_sign = sign_transactions(encrypt_data, request.user.id)
+#
+#                     # data_bytes_block = data_block.encode('utf-8')
+#                     encrypt_data_block = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
+#                     handle_mine_blockchain = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
+#                                                         hash_mine=handle,
+#                                                         user_id=request.user.id,
+#                                                         signature_hex=signature_hex,
+#                                                         data=data_sign)
+#
+#                     end_time = time.time()
+#                     # print(f"Thời gian chạy: {end_time - start_time} giây")
+#                     return render(request, 'mine_success.html')
+#                 else:
+#                     return render(request, '401.html')
+#             else:
+#                 return render(request, '401.html')
+#         else:
+#             return render(request, '500.html')
 
 
 def mining_page(request):
