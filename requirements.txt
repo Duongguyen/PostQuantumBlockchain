@@ -19,3 +19,7 @@ sqlparse==0.4.4
 typing_extensions==4.8.0
 tzdata==2023.3
 urllib3==2.0.4
+PyMySQL==1.1.1
+djangorestframework-simplejwt==5.5.0
+PyYAML==6.0.1
+six==1.17.0
