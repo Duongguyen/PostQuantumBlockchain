@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-+3yhw87m&%yw2f(+2)lpq53s4qqy(=na+zarea)iy9-*@d$92(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '192.168.83.128']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -88,7 +88,7 @@ DATABASES = {
         "NAME": "block_chain_sphincs",
         "USER": 'root',
         "PASSWORD": 'Qaz@12345',
-        "HOST": '192.168.83.129',
+        "HOST": '127.0.0.1',
         "PORT": '3306',
         "OPTIONS": {
             'charset': 'utf8mb4',
