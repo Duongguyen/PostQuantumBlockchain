@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from .views.transaction.views import (base, sell_crypto,\
     mine_crypto, authenticity_mine, register, login_base, log_out, process_register,
-                                      render_templates, verify_email, news_detail, toggle_like, mining_page, mining_crypto_sph, otp_verification_mine)
+                                      render_templates, verify_email, news_detail, toggle_like, mining_page, mining_crypto_sph, otp_verification_mine, information, guide)
 from .views.transaction.transactions import (create_transaction_use_case, otp_verification_view, pending_transactions_view, transaction_detail, process_sell, my_transactions)
 
 urlpatterns = [
@@ -32,4 +32,7 @@ urlpatterns = [
     path('verify-email/<str:uidb64>/<str:token>/', verify_email, name='verify_email'),
     path('news/<int:news_id>/', news_detail, name='news_detail'),
     path('toggle-like/<int:news_id>/', toggle_like, name='toggle_like'),
+
+    path('information/', information, name='information'),
+    path('guide/', guide, name='guide'),
 ]

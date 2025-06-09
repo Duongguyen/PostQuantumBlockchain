@@ -50,6 +50,16 @@ def mine_crypto(request):
         return render(request, 'mine.html')
 
 
+def information(request):
+    if request.user.is_authenticated and request.user.username != 'admin':
+        return render(request, 'information.html')
+
+
+def guide(request):
+    if request.user.is_authenticated and request.user.username != 'admin':
+        return render(request, 'guide.html')
+
+
 def base(request):
     if request.user.is_authenticated and request.user.username != 'admin':
         user_not_login = "hidden"
@@ -168,7 +178,7 @@ def send_verification_email(user, request):
     # In ra để kiểm tra
     print(f"UID: {uid}, Token: {token}")
 
-    verification_url = f'http://{current_site.domain}/blockchains/verify-email/{uid}/{token}/'
+    verification_url = f'https://{current_site.domain}/verify-email/{uid}/{token}/'
     email_content = render_to_string('email_verification.html', {
         'user': user,
         'verification_url': verification_url,
@@ -256,6 +266,7 @@ def process_register(request):
                     is_verified=False,
                     private_key=encrypt_key_hex,
                     user_id=user_account.id,
+                    balance=5,
                 )
                 print("3")
                 account.save()

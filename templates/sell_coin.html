@@ -2,44 +2,40 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block sell_coin %}
-<div id="layoutSidenav">
-    <div id="layoutSidenav_content">
-        <form method="POST" action="{% url 'transaction' %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
-            {% csrf_token %}
+    <form method="POST" action="{% url 'transaction' %}" class="row g-3" style="margin-left: 2%; margin-top: 2%">
+        {% csrf_token %}
+        <div class="col-md-7">
+            <label for="inputEmail4" class="form-label">Address Wallet</label>
+            <input name="destination" type="text" class="form-control" id="inputEmail4">
+        </div>
+
+        <div class="col-md-7">
+            <label for="inputAddress2" class="form-label">Amount</label>
+            <input name="amount" type="number" class="form-control" id="inputAddress2" placeholder="" step="any">
+        </div>
+        <div class="col-md-7">
+            <label for="inputAddress" class="form-label">Current Password</label>
+            <input style="width: 200px" name="pass_check" type="password" class="form-control" id="inputAddress" placeholder="">
+        </div>
+        {{ form.captcha }}
+        {% for error in form.captcha.errors %}
+
+        <p>{{ error }}</p>
+        {% endfor %}
+
+        <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Sell</button>
+        </div>
+
+        {% if messages %}
             <div class="col-md-7">
-                <label for="inputEmail4" class="form-label">Address Wallet</label>
-                <input name="destination" type="text" class="form-control" id="inputEmail4">
-            </div>
-
-            <div class="col-md-7">
-                <label for="inputAddress2" class="form-label">Amount</label>
-                <input name="amount" type="number" class="form-control" id="inputAddress2" placeholder="" step="any">
-            </div>
-            <div class="col-md-7">
-                <label for="inputAddress" class="form-label">Current Password</label>
-                <input style="width: 200px" name="pass_check" type="password" class="form-control" id="inputAddress" placeholder="">
-            </div>
-            {{ form.captcha }}
-            {% for error in form.captcha.errors %}
-
-            <p>{{ error }}</p>
-            {% endfor %}
-
-            <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
-
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">Sell</button>
-            </div>
-
-            {% if messages %}
-                <div class="col-md-7">
-                    <div class="alert alert-success text-center mt-4">
-                        <i class="fas fa-check-circle"></i> {{ messages }}
-                    </div>
+                <div class="alert alert-success text-center mt-4">
+                    <i class="fas fa-check-circle"></i> {{ messages }}
                 </div>
-            {% endif %}
+            </div>
+        {% endif %}
 
-        </form>
-    </div>
-</div>
+    </form>
 {% endblock sell_coin %}
