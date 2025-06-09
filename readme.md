@@ -12,15 +12,11 @@ Tải mã nguồn:
 > git@github.com:Duongguyen/PostQuantumBlockchain.git
  
 Cài đặt SPHINCS+:
-- Download:
+- Giải nén tại "/home/ubuntu-64bit/Downloads/PQB/dist/pqcrypto.rar":
+- Giải nén file ở dòng lệnh trên sau đó Copy vào thư mục ./PQB
 
-[Chữ ký số SPHINCS+](https://drive.google.com/file/d/1bTESh3lhsHxPxzTKzBAb32d0CAod1gjK/view?usp=drive_link)
-
-- Giải nén file tải về sau đó Copy vào thư mục ./PQB
-
-[Mã băm SPHINCS+](https://drive.google.com/file/d/1MZ-sjhr4BDGDtXKMwiUfQ1knoo7z1hX_/view?usp=sharing)
-
-- Giải nén file tải về sau đó copy vào thư mục ./PQB/menu
+- Giải nén tại "/home/ubuntu-64bit/Downloads/PQB/dist/sphincs_python.rar"
+- Giải nén file ở dòng lệnh trên sau đó copy vào thư mục ./PQB/menu
 
 - Cài đặt:
 
