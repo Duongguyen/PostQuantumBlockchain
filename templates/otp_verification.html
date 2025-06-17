@@ -1,24 +1,20 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block verification %}
-<div id="layoutSidenav">
-    <div id="layoutSidenav_content">
-        <form method="POST" action="{% url 'otp_verification_page' result %}" class="row g-3" style="margin-top: 20px; margin-left: 30px">
-            {% csrf_token %}
-            <div class="col-md-7">
-                <label for="otpCode" class="form-label">Enter OTP</label>
-                <input name="otp_code" type="text" class="form-control" id="otpCode" placeholder="Enter the OTP sent to your email">
-            </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">Verify OTP</button>
-            </div>
-        </form>
-
-        {% if error_message %}
-        <div class="alert alert-danger mt-3" role="alert">
-            {{ error_message }}
-        </div>
-        {% endif %}
+<form method="POST" action="{% url 'otp_verification_page' result %}" class="row g-3" style="margin-top: 1.5%; margin-left: 2%">
+    {% csrf_token %}
+    <div class="col-md-7">
+        <label for="otpCode" class="form-label">Enter OTP</label>
+        <input name="otp_code" type="text" class="form-control" id="otpCode" placeholder="Enter the OTP sent to your email">
     </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Verify OTP</button>
+    </div>
+</form>
+
+{% if error_message %}
+<div class="alert alert-danger mt-3" role="alert">
+    {{ error_message }}
 </div>
+{% endif %}
 {% endblock verification %}
