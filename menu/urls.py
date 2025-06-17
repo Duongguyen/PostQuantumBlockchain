@@ -2,11 +2,13 @@ from django.urls import path, include
 
 from .views.transaction.views import (base, sell_crypto,\
     mine_crypto, authenticity_mine, register, login_base, log_out, process_register,
-                                      render_templates, verify_email, news_detail, toggle_like, mining_page, mining_crypto_sph, otp_verification_mine, information, guide, solutions_view)
+                                      render_templates, verify_email, news_detail, toggle_like,
+                                      mining_page, mining_crypto_sph, otp_verification_mine,
+                                      information, guide, solutions_view, login_session)
 from .views.transaction.transactions import (create_transaction_use_case, otp_verification_view, pending_transactions_view, transaction_detail, process_sell, my_transactions)
 
 urlpatterns = [
-    path('', base, name='base'),
+    path('', login_base, name='homepage'),
     path('start/', render_templates, name='start'),
     path('sell_crypto/', sell_crypto, name='sell_crypto'),
     path('mine/', mine_crypto, name='mine_crypto'),
@@ -24,8 +26,9 @@ urlpatterns = [
     path('POST/mining/', mining_crypto_sph, name='mining_crypto'),
     path('mining_page/', mining_page, name='mining_page'),
 
-    path('homepage/', login_base, name="homepage"),
+        # path('homepage/', login_base, name="homepage"),
 
+    path('login/', login_session, name="login"),
     path('register/', register, name="register"),
     path('process_register/', process_register, name="process_register"),
     path('logout/', log_out, name="logout"),
@@ -36,4 +39,5 @@ urlpatterns = [
     path('information/', information, name='information'),
     path('guide/', guide, name='guide'),
     path('solutions/', solutions_view, name='solutions')
+
 ]

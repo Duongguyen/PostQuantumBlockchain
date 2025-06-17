@@ -21,7 +21,7 @@ from ...sphincs_python.package.sphincs import Sphincs
 from ...utils.common.security import mine, check_valid_mine, hash_mine, check_valid_mine_sph
 from .utils import email_verification_token, select_key
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout, login
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -51,42 +51,41 @@ def mine_crypto(request):
 
 
 def information(request):
-    if request.user.is_authenticated and request.user.username != 'admin':
-        return render(request, 'information.html')
-
+    return render(request, 'information.html')
 
 def guide(request):
-    if request.user.is_authenticated and request.user.username != 'admin':
-        return render(request, 'guide.html')
+    return render(request, 'guide.html')
 
 def solutions_view(request):
-    if request.user.is_authenticated and request.user.username != 'admin':
-        return render(request, 'solutions.html')
-
+    return render(request, 'solutions.html')
 
 def base(request):
+    user_not_login = "show"
+    user_login = "hidden"
+    public_key_hex = ""
+    decrypt_key_hex = ""
+
     if request.user.is_authenticated and request.user.username != 'admin':
         user_not_login = "hidden"
         user_login = "show"
         decrypt_key_hex, public_key_hex = select_key(request.user.id)
-        context = {
-            'user_not_login': user_not_login,
-            'user_login': user_login,
-            'public_key': public_key_hex,
-            'private_key': decrypt_key_hex
-        }
-        return render(request, 'index.html', context)
-    else:
-        return render(request, 'login.html', {'user_not_login': "show", 'user_login': "hidden"})
+
+    return render(request, 'index.html', {
+        'user_not_login': user_not_login,
+        'user_login': user_login,
+        'public_key': public_key_hex,
+        'private_key': decrypt_key_hex
+    })
 
 def login_base(request):
+    # Lấy dữ liệu dùng chung cho cả đã đăng nhập và chưa đăng nhập
+    news_list = New.objects.all().order_by('-id')[:5]
+    title_list = TitlePage.objects.all()
+    for title in title_list:
+        title.split_title = title.title.split(' ', 1)
+
+    # Nếu người dùng đã đăng nhập và không phải admin
     if request.user.is_authenticated and request.user.username != 'admin':
-        news_list = New.objects.all().order_by('-id')[:5]
-        title_list = TitlePage.objects.all()
-
-        for title in title_list:
-            title.split_title = title.title.split(' ', 1)
-
         user_account = Account.objects.get(user_id=request.user.id)
         decrypt_key_hex, public_key_hex = select_key(request.user.id)
 
@@ -96,9 +95,11 @@ def login_base(request):
             'username': request.user.username,
             'user_account': user_account,
             'public_key': public_key_hex,
-            'private_key': decrypt_key_hex
+            'private_key': decrypt_key_hex,
+            'is_authenticated': True
         })
 
+    # Nếu là phương thức POST, xử lý đăng nhập
     if request.method == "POST":
         recaptcha_response = request.POST.get('g-recaptcha-response')
         data = {
@@ -114,30 +115,20 @@ def login_base(request):
 
         username_check = request.POST.get('username')
         password_check = request.POST.get('password')
-
         user = authenticate(request, username=username_check, password=password_check)
+
         if user:
             login(request, user)
-            news_list = New.objects.all().order_by('-id')[:5]
-            title_list = TitlePage.objects.all()
-            for title in title_list:
-                title.split_title = title.title.split(' ', 1)
-
-            user_account = Account.objects.get(user_id=request.user.id)
-            decrypt_key_hex, public_key_hex = select_key(request.user.id)
-            return render(request, 'index.html', {
-                'news_list': news_list,
-                'title_list': title_list,
-                'username': username_check,
-                'user_account': user_account,
-                'public_key': public_key_hex,
-                'private_key': decrypt_key_hex
-            })
+            return redirect('homepage')
         else:
             messages.info(request, 'User or password is not correct!')
 
-    return render(request, 'login.html')
-
+    # Nếu chưa đăng nhập và không phải POST, hiển thị index.html dạng khách
+    return render(request, 'index.html', {
+        'news_list': news_list,
+        'title_list': title_list,
+        'is_authenticated': False
+    })
 
 
 def news_detail(request, news_id):
@@ -169,9 +160,12 @@ def toggle_like(request, news_id):
 def register(request):
     return render(request, 'sign_up.html')
 
+def login_session(request):
+    return render(request, 'login.html')
+
 def log_out(request):
     logout(request)
-    return render(request, 'login.html')
+    return redirect('homepage')
 
 def send_verification_email(user, request):
     current_site = get_current_site(request)
@@ -196,7 +190,6 @@ def send_verification_email(user, request):
         html_message=email_content,
         fail_silently=False,
     )
-
 
 def process_register(request):
     if request.user.is_authenticated and request.user.username != 'admin':
@@ -406,58 +399,6 @@ def otp_verification_mine(request):
         return render(request, 'otp_verification_mine.html')
     return render(request, 'login.html')
 
-# def authenticity_mine(request):
-#     start_time = time.time()
-#     if request.user.is_authenticated and request.user.username != 'admin':
-#         if request.method == 'POST':
-#             form = TransactionForm(request.POST)
-#             if form.is_valid():
-#                 data_session = Transaction.objects.get(hash_session=form['hash_session'].value())
-#                 created_at_str = str(data_session.created_at)
-#
-#                 created_at_dt = datetime.fromisoformat(created_at_str.split('+')[0])
-#
-#                 formatted_time = created_at_dt.strftime('%Y-%m-%d %H:%M:%S')
-#                 data = {
-#                     "from_send": form['from_send'].value(),
-#                     "amount": data_session.amount,
-#                     "timestamp": formatted_time
-#                 }
-#                 handle = check_valid_mine_sph(str(data), int(form['header'].value()))
-#                 account_info = Account.objects.get(user_id=request.user.id)
-#
-#                 if handle and form['header'].value():
-#                     dt = datetime.fromisoformat(str(now()))
-#                     result = dt.strftime("%Y-%m-%d %H:%M:%S")
-#
-#                     data_block = account_info.address_wallet + ',' + "none" + ',' + "1" + ',' + result + ',' + form['header'].value()
-#                     data_bytes = data_block.encode('utf-8')
-#
-#                     sk_sea_bytes_hex = bytes.fromhex(SK_SEA)
-#                     pdd_sea_bytes_hex = bytes.fromhex(PDD_SEA)
-#                     encrypt_data = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
-#
-#                     signature_hex, data_sign = sign_transactions(encrypt_data, request.user.id)
-#
-#                     # data_bytes_block = data_block.encode('utf-8')
-#                     encrypt_data_block = encrypt_aes_256(data_bytes, sk_sea_bytes_hex, pdd_sea_bytes_hex)
-#                     handle_mine_blockchain = create_blockchain_use_case(encrypt_data_block=encrypt_data_block,
-#                                                         hash_mine=handle,
-#                                                         user_id=request.user.id,
-#                                                         signature_hex=signature_hex,
-#                                                         data=data_sign)
-#
-#                     end_time = time.time()
-#                     # print(f"Thời gian chạy: {end_time - start_time} giây")
-#                     return render(request, 'mine_success.html')
-#                 else:
-#                     return render(request, '401.html')
-#             else:
-#                 return render(request, '401.html')
-#         else:
-#             return render(request, '500.html')
-
-
 def mining_page(request):
     if request.user.is_authenticated and request.user.username != 'admin':
         return render(request, 'mining.html')
@@ -478,30 +419,6 @@ def verify_email(request, uidb64, token):
     else:
         messages.error(request, "Liên kết xác thực không hợp lệ hoặc đã hết hạn!")
         return render(request, 'sign_up.html')
-
-
-# @csrf_exempt
-# def mining_crypto(request):
-#     if request.method == "POST":
-#         try:
-#             # NONCE = '00000'
-#             nonce_base = 0
-#             data = json.loads(request.body)
-#             transactions = data['transactions']
-#             block = json.dumps(transactions) + str(nonce_base)
-#             new_hash = hash_mine(block)
-#             print(str(NONCE))
-#             while not new_hash.startswith(str(NONCE)):
-#                 nonce_base += 1
-#                 block = json.dumps(transactions) + str(nonce_base)
-#                 new_hash = SHA256(block)
-#
-#             print(new_hash)
-#             return JsonResponse({"success": True, "nonce": nonce_base})
-#         except Exception as e:
-#             return JsonResponse({"success": False, "error": str(e)})
-#     return JsonResponse({"success": False, "error": "Invalid request"})
-
 
 @csrf_exempt
 def mining_crypto_sph(request):
@@ -528,21 +445,6 @@ def mining_crypto_sph(request):
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Invalid request"})
 
-# @login_required
-# def account_details(request):
-#     public_key, secret_key = generate_keypair()
-#
-#     public_key_hex = public_key.hex()
-#     secret_key_hex = secret_key.hex()
-#
-#     public_key_original = bytes.fromhex(public_key_hex)
-#     secret_key_original = bytes.fromhex(secret_key_hex)
-#
-#     print("Original Public key:", public_key_hex)
-#     print("Original Secret key:", secret_key_hex)
-#
-#     return render(request, 'base.html', {'public_key': public_key_hex, 'private_key': secret_key_hex})
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
@@ -557,24 +459,3 @@ def account_details(request):
         'public_key': public_key_hex,
         'private_key': secret_key_hex
     })
-
-
-# def select_balance():
-#     get_balance = BlockchainUser.objects.get(username=form['from_send'].value())
-
-
-# class RegisterView(generics.GenericAPIView):
-#     serializer_class = RegisterSerializer
-#
-#     def post(self, request):
-#         user = request.data
-#         serializer = self.serializer_class(data=user)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         user_data = serializer.data
-#
-#         user = BlockchainUser.objects.get(email=user_data['email'])
-#
-#         token = RefreshToken.for_user(user)
-#
-#         return Response(user_data, status=status.HTTP_201_CREATED)
