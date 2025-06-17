@@ -1,39 +1,99 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block mine %}
-        <!-- Nút "Sell" -->
+    <!-- Nút "Sell" -->
     <a href="{% url 'mining_page' %}"
        class="btn btn-success btn-lg"
-       style="position: absolute; top: 30px; right: 90px; width: 100px; height: 50px; display: flex; justify-content: center; align-items: center;">
-        Excavator
+       style="position: absolute; top: 3%; right: 9%; width: 13%; height: 5%; display: flex; justify-content: center; align-items: center;">
+        <i class="fas fa-cogs me-2"></i>Excavator
     </a>
 
-    <form method="POST" action="{% url 'authenticity_mine' %}" class="row g-3" style="margin-top: 2%; margin-left: 2%">
-        {% csrf_token %}
-        <div class="col-md-7">
-            <label for="inputHeader" class="form-label">Header</label>
-            <input name="header" type="number" class="form-control" id="inputHeader" placeholder="Dự đoán số Nonce">
+    <div class="container" style="margin-top: 6%;">
+        <div class="row">
+            <!-- FORM BÊN TRÁI -->
+            <div class="col-md-7">
+                <form method="POST" action="{% url 'authenticity_mine' %}" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-12">
+                        <label for="inputHeader" class="form-label fw-bold">
+                              <i class="fas fa-hashtag me-1 text-primary"></i>Header
+                        </label>
+<!--                        <label for="inputHeader" class="form-label"><i class="fas fa-hashtag me-1 text-primary"></i>Header</label>-->
+                        <input name="header" type="number" class="form-control" id="inputHeader" placeholder="Dự đoán số Nonce">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="inputSender" class="form-label fw-bold"><i class="fas fa-user me-1 text-primary"></i>Sender</label>
+                        <input name="from_send" type="text" class="form-control" id="inputSender" placeholder="Người gửi">
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="hash_session" class="form-label fw-bold"><i class="fas fa-lock me-1 text-primary"></i>Hash Session</label>
+                        <input name="hash_session" type="text" class="form-control" id="hash_session" placeholder="Nhập hash session của phiên giao dịch">
+                    </div>
+
+                    <div class="col-md-12">
+                        {{ form.captcha }}
+                        {% for error in form.captcha.errors %}
+                        <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shield-alt me-2"></i>Mine Authentication
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- HƯỚNG DẪN BÊN PHẢI -->
+            <div class="col-md-5">
+                <div class="card border-info shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle me-2 text-primary"></i>
+                            Hướng dẫn xác thực quá trình đào tiền mã hóa
+                        </h5>
+                        <ol class="mb-0 ps-3">
+                            <li>
+                                <strong>
+                                    <i class="fas fa-sign-in-alt me-1" style="color: #007bff;"></i>Bước 1:
+                                </strong> Đăng nhập vào hệ thống.
+                            </li>
+                            <li>
+                                <strong>
+                                    <i class="fas fa-sitemap me-1" style="color: #17a2b8;"></i>Bước 2:
+                                </strong> Chọn tính năng <strong>“Mine”</strong> ở khối <strong>FEATURES</strong> bên trái.
+                            </li>
+                            <li>
+                                <strong>
+                                    <i class="fas fa-edit me-1" style="color: #28a745;"></i>Bước 3:
+                                </strong> Nhập các thông tin:
+                                <ul>
+                                    <li><i class="fas fa-hammer me-1" style="color: #6f42c1;"></i>Số nonce đã đào được</li>
+                                    <li><i class="fas fa-wallet me-1" style="color: #fd7e14;"></i>Địa chỉ ví người gửi</li>
+                                    <li><i class="fas fa-fingerprint me-1" style="color: #dc3545;"></i>Mã băm giao dịch</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>
+                                    <i class="fas fa-envelope-open-text me-1" style="color: #ffc107;"></i>Bước 4:
+                                </strong> Xác thực mã OTP gửi về email.
+                            </li>
+                            <li>
+                                <strong>
+                                    <i class="fas fa-gift me-1" style="color: #20c997;"></i>Bước 5:
+                                </strong> Nhận phần thưởng là 1 đồng tiền mã hóa.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="col-md-7">
-            <label for="inputEmail4" class="form-label">Sender</label>
-            <input name="from_send" type="text" class="form-control" id="inputEmail4" placeholder="Người gửi">
-        </div>
-
-        <div class="col-md-7">
-            <label for="inputEmail4" class="form-label">Hash Session</label>
-            <input name="hash_session" type="text" class="form-control" id="hash_session" placeholder="Nhập hash session của phiên giao dịch">
-        </div>
-
-        {{ form.captcha }}
-        {% for error in form.captcha.errors %}
-        <p>{{ error }}</p>
-        {% endfor %}
-
-        <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
-
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Mine Authentication</button>
-        </div>
-    </form>
+    </div>
 {% endblock mine %}

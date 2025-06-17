@@ -1,21 +1,29 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block mining_crypto %}
-<div class="d-flex justify-content-center" style="margin-top: 2%;">
-    <div style="width: 70%;">
-        <h1 class="text-center">Mine Cryptocurrency</h1>
+<div class="d-flex justify-content-start" style="margin-top: 2%;">
+    <!-- CỘT TRÁI: Form Mining -->
+    <div style="width: 55%; margin-left: 5%;">
+        <h1 class="text-center fw-bold mb-4">
+            <i class="fas fa-hammer me-2 text-success"></i>Mine Cryptocurrency
+        </h1>
 
         <form id="mineForm" method="POST" action="{% url 'mining_crypto' %}">
             {% csrf_token %}
             <div class="mb-3" style="margin-top: 3%;">
-                <label for="transactions" class="form-label">Transactions (JSON Format):</label>
+                <label for="transactions" class="form-label fw-bold">
+                    <i class="fas fa-exchange-alt me-2 text-primary"></i>Transactions (JSON Format):
+                </label>
                 <textarea class="form-control" id="transactions" name="transactions" rows="10"
-                    style="font-size: 18px; padding: 10px;" placeholder="{'from_send': 'b6d90753bde2c1d3d31839e0a4cd03933fa2a90bf80f18e0b6e5519fbb29d91f', 'amount': 1.0, 'timestamp': '2025-03-23 04:11:40'}" required></textarea>
+                    style="font-size: 18px; padding: 10px;" placeholder="{'from_send': 'địa chỉ ví gửi', 'amount': số dư đã giao dịch, 'timestamp': 'Mốc thời gian giao dịch'}" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Start Mining</button>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-coins me-2"></i>Start Mining
+            </button>
         </form>
 
-        <div id="miningStatus" class="text-center mt-4 d-none">
+        <!-- Trạng thái đào -->
+        <div id="miningStatus" class="text-left mt-4 d-none">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Mining...</span>
             </div>
@@ -23,11 +31,42 @@
         </div>
 
         <div id="miningResult" class="alert alert-success mt-4 d-none" role="alert">
-            Mining completed successfully, enter the Nonce number as soon as possible to receive the reward! Nonce: <span id="nonceValue"></span>
+            <i class="fas fa-check-circle me-2"></i>Mining completed! Nonce: <span id="nonceValue"></span>
         </div>
 
         <div id="miningError" class="alert alert-danger mt-4 d-none" role="alert">
-            Mining failed. Please try again.
+            <i class="fas fa-exclamation-triangle me-2"></i>Mining failed. Please try again.
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI: Hướng dẫn -->
+    <div style="width: 35%; margin-left: 3%; background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+        <h4 class="mb-3" style="line-height: 1.4;">
+            <i class="fas fa-info-circle text-info me-2"></i>Hướng Dẫn Đào Tiền Mã Hóa
+        </h4>
+        <ul class="list-unstyled" style="font-size: 15.5px; line-height: 1.4;">
+            <li class="mb-2">
+                <i class="fas fa-sign-in-alt text-primary me-2"></i><strong>Bước 1:</strong> Đăng nhập vào hệ thống
+            </li>
+            <li class="mb-2">
+                <i class="fas fa-compass text-success me-2"></i><strong>Bước 2:</strong> Chọn mục <b>Mine</b> trong thanh bên trái và nhấn <b>Excavator</b>
+            </li>
+            <li class="mb-2">
+                <i class="fas fa-keyboard text-warning me-2"></i><strong>Bước 3:</strong> Nhập thông tin giao dịch (nhận qua email)
+            </li>
+            <li class="mb-2">
+                <i class="fas fa-cogs text-danger me-2"></i><strong>Bước 4:</strong> Nhấn nút <b>Start Mining</b> để bắt đầu đào
+            </li>
+            <li class="mb-2">
+                <i class="fas fa-save text-secondary me-2"></i><strong>Bước 5:</strong> Lưu lại số <b>nonce</b> khi hoàn tất
+            </li>
+        </ul>
+        <p class="text-muted" style="font-size: 13.5px; line-height: 1.4;">
+            <i class="fas fa-lightbulb text-warning me-1"></i> Hãy đảm bảo nhập đúng thông tin giao dịch để tránh lỗi.
+        </p>
+        <div class="text-center mt-3">
+            <img src="{% static 'images/đào coin.png' %}" class="img-fluid rounded shadow" alt="Hình 4: Thực hiện giao dịch">
+            <p class="text-muted mt-2" style="font-size: 13px;">Hình 1: Hướng dẫn đào tiền mã hóa</p>
         </div>
     </div>
 </div>

@@ -1,316 +1,169 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 {% load static %}
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Dashboard - Admin</title>
-        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-        <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-        <script type="text/javascript">
-            function confirmLogout() {
-                var result = confirm("Are you sure you want to log out?");
-                return result;
-            }
-        </script>
-        <script>
-            function togglePrivateKey() {
-                var privateKeyElement = document.getElementById("privateKey");
-                if (privateKeyElement.textContent === "**********") {
-                    privateKeyElement.textContent = "0x1234abcd5678efgh9012ijkl"; // Giả lập private key
-                } else {
-                    privateKeyElement.textContent = "**********";
-                }
-            }
-        </script>
-        <style>
-            #publicKey {
-                word-wrap: break-word;
-                word-break: break-all;
-                overflow-wrap: break-word;
-                white-space: normal;
-                display: block;
-                max-width: 100%; /* Đảm bảo không tràn ra ngoài modal */
-            }
-            .list-group-item {
-            transition: all 0.3s ease;
-            }
+{% block information %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary" style="margin-top: 20px">Giới thiệu sản phẩm nghiên cứu</h1>
+    </div>
 
-            .list-group-item:hover {
-                background-color: #f8f9fa;
-                transform: translateY(-2px);
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            }
+    <!-- Tóm tắt dự án -->
+    <div class="card shadow-lg rounded-4 mb-5 border-0">
+        <div class="card-body p-5">
+            <h3 class="mb-4 text-dark">1. Tóm tắt dự án</h3>
+            <p class="text-justify">
+                Trước sự phát triển mạnh mẽ của công nghệ Blockchain và nhu cầu bảo mật ngày càng cao trong các giao dịch tài chính số, việc đảm bảo tính an toàn, toàn vẹn và xác thực của các giao dịch trở thành vấn đề then chốt...
+            </p>
+            <p class="text-justify">
+                Trong bối cảnh đó, vấn đề đảm bảo an toàn thông tin không chỉ giới hạn trong lĩnh vực kinh tế-xã hội, tài chính mà còn đặc biệt quan trọng với lĩnh vực an ninh-quốc phòng...
+            </p>
 
-            .otp-container {
-                max-width: 600px;
-                margin: 50px auto 0 auto; /* Chỉnh sửa giá trị margin-top thành 50px */
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                background-color: #fff;
-                position: absolute; /* Đưa form lên trên */
-                top: 20%; /* Điều chỉnh khoảng cách từ phía trên */
-                left: 50%;
-                transform: translate(-50%, -20%);
-            }
-
-            .mining-container {
-                width: 900px;  /* Tăng chiều rộng */
-                height: 600px;     /* Tăng chiều cao */
-                margin: 50px auto;
-                padding: 50px 50px 20px;
-                border: 1px solid #ccc;
-                border-radius: 20px;
-                box-shadow: 4px 8px 12px rgba(0,0,0,0.1);
-                background-color: #fff;
-                position: absolute;
-                top: 10%;  /* Giữ form ở giữa */
-                left: 50%;
-                transform: translate(-50%, -10%);
-            }
-
-            .transactions-container {
-                position: absolute;
-                top: 10%;  /* Giữ form ở giữa */
-                right: 13%;
-            }
-
-            body {
-                background: linear-gradient(to right, #f8f9fa, #e9ecef);
-                color: #212529;
-                font-family: "Roboto", sans-serif;
-                height: 100%;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-            }
-            #layoutSidenav {
-                flex: 1;
-            }
-            footer {
-                text-align: center;
-                padding: 10px 0;
-                background-color: #343a40;
-                color: #adb5bd;
-                width: 100%;
-            }
-            .sb-sidenav {
-                background-color: #343a40;
-            }
-            .sb-sidenav a.nav-link {
-                color: #adb5bd;
-            }
-            .sb-sidenav a.nav-link:hover {
-                background-color: #495057;
-                color: #ffffff;
-            }
-            .navbar-dark.bg-dark {
-                background-color: #212529;
-                border-bottom: 2px solid #495057;
-            }
-            table {
-                background-color: #ffffff;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            table thead {
-                background-color: #343a40;
-                color: #ffffff;
-            }
-            table tbody tr:hover {
-                background-color: #f1f1f1;
-            }
-            .container, .table, .navbar, .sb-sidenav {
-                border-radius: 8px;
-                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            a, button {
-                transition: all 0.3s ease-in-out;
-            }
-
-        </style>
-    </head>
-    <body class="sb-nav-fixed">
-    <div id="layoutSidenav">
-    <div id="layoutSidenav_content">
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="{% url 'homepage' %}">Home Page</a>
-             Sidebar Toggle
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
-                <i class="fas fa-bars"></i>
-            </button>
-             Navbar Search
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </form>
-            <!-- User Balance -->
-            <div class="navbar-text text-white ms-3">
-                {% if user_account %}
-                    ${{ user_account.balance }}
-                {% else %}
-                    $0.00
-                {% endif %}
-            </div>
-            <!-- Navbar-->
-            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user fa-fw"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#!">Settings</a></li>
-                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#accountDetailsModal">Account Details</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="{% url 'logout' %}" onclick="return confirmLogout()">Logout</a></li>
-                    </ul>
-                </li>
+            <p class="fw-semibold">Trong lĩnh vực Blockchain, có hai thành phần cần được đảm bảo an toàn tuyệt đối:</p>
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item">🔐 Hàm băm: Đảm nhận vai trò liên kết các khối, đảm bảo tính toàn vẹn dữ liệu.</li>
+                <li class="list-group-item">🖊️ Chữ ký số: Xác thực danh tính và tính hợp lệ của các giao dịch.</li>
             </ul>
-        </nav>
 
-<!--        <div id="layoutSidenav">-->
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            <div class="sb-sidenav-menu-heading">Features</div>
-                            <a class="nav-link" href="{% url 'sell_crypto' %}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Sell Crypto
-                            </a>
-                            <a class="nav-link" href="{% url 'mine_crypto' %}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-hammer"></i></div>
-                                Mine
-                            </a>
-                            <a class="nav-link" href="{% url 'information' %}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                                Product Information
-                            </a>
+            <p>Trên cơ sở đó, nhóm nghiên cứu đề xuất một giải pháp tích hợp lược đồ chữ ký số hậu lượng tử <strong>SPHINCS+</strong> – một trong những ứng viên nổi bật đã được tiêu chuẩn hóa bởi <strong>NIST</strong> – vào hệ thống Blockchain.</p>
 
-                            <a class="nav-link" href="{% url 'guide' %}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                                Instructions for use
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sb-sidenav-footer">
-                        <div class="small">Logged in as:</div>
-                         <i class="fas fa-user fa-fw"></i> {{ username }}
-                    </div>
-                </nav>
-            </div>
-<!--        </div>-->
-        {% block bad_request %}{% endblock bad_request %}
-        {% block transaction %}{% endblock transaction %}
-        {% block mine %}{% endblock mine %}
-        {% block mine_success %}   {% endblock mine_success %}
-        {% block content %}{% endblock content %}
-        {% block new %}{% endblock new %}
-        {% block verification %}{% endblock verification %}
-        {% block page_sell %}{% endblock page_sell %}
-        {% block process_sell %}{% endblock process_sell %}
-        {% block verification_sell %}{% endblock verification_sell %}
-        {% block mining_crypto %} {% endblock mining_crypto %}
-        {% block my_transactions %}{% endblock my_transactions %}
-        {% block sell_coin %}{% endblock sell_coin %}
-        {% block information %}{% endblock information %}
-        {% block guide %} {% endblock guide %}
-        {% block test %} {% endblock test %}
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="{% static 'js/scripts.js' %}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-        <script src="{% static 'assets/demo/chart-area-demo.js' %}"></script>
-        <script src="{% static 'assets/demo/chart-bar-demo.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-        <script src="{% static 'js/datatables-simple-demo.js' %}"></script>
-        <script src="{% static 'js/crypto.js' %}"></script>
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-        <footer class="text-center mt-4 p-3" style="background-color: #212529; color: #f8f9fa;">
-                   Bản quyền của Nguyễn Đặng Dương và TS. Lục Như Quỳnh |
-            <a href="mailto:bitcoinvietnam1811@gmail.com mailto:quynhln@actvn.edu.vn" style="color: #ffc107; text-decoration: none;">
-                Liên hệ: bitcoinvietnam1811@gmail.com hoặc quynhln@actvn.edu.vn
-            </a> để biết thêm chi tiết.
-        </footer>
+            <p class="fw-semibold">Mục tiêu của giải pháp:</p>
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item">✅ Tăng cường tính bảo mật trước các mối đe dọa từ máy tính lượng tử</li>
+                <li class="list-group-item">✅ Đảm bảo tính xác thực và toàn vẹn của giao dịch</li>
+                <li class="list-group-item">✅ Đáp ứng yêu cầu về hiệu năng thông qua cấu hình SPHINCS+ phù hợp</li>
+            </ul>
 
-    <div class="modal fade" id="accountDetailsModal" tabindex="-1" aria-labelledby="accountDetailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="accountDetailsModalLabel">Account Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <strong>Public Key</strong>
-
-
-                    <div class="alert alert-primary text-break">
-                        <span id="publicKey">{{ public_key }}</span> <!-- Giới hạn hiển thị khóa công khai -->
-                        <i class="bi bi-clipboard" style="cursor: pointer;" onclick="copyToClipboard('publicKey')"></i>
-                    </div>
-
-                    <button class="btn btn-primary" onclick="togglePrivateKey()">Show private key</button>
-
-                    <div id="privateKeyContainer" class="mt-3" style="display: none;">
-                        <div class="alert alert-secondary text-break">
-                            <span id="privateKey">********</span>
-                            <i class="bi bi-clipboard" style="cursor: pointer;" onclick="copyToClipboard('privateKey')"></i>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+            <p class="mb-0">Giải pháp hướng đến xây dựng một nền tảng Blockchain an toàn, kháng lượng tử, phục vụ các lĩnh vực tài chính, chính phủ và quốc phòng.</p>
         </div>
     </div>
 
-    <script>
-        let isPrivateKeyVisible = false;
-        let actualPrivateKey = "{{ private_key }}"; // Thay giá trị này bằng private_key thực tế từ backend
+    <!-- Mô tả chi tiết -->
+    <div class="card shadow-lg rounded-4 border-0">
+        <div class="card-body p-5">
+            <h3 class="mb-4 text-dark">2. Mô tả chi tiết</h3>
+            <p>Băm là một thành phần quan trọng của công nghệ Blockchain, đảm bảo rằng các giao dịch được an toàn và chống giả mạo.</p>
 
-        function togglePrivateKey() {
-            let privateKeySpan = document.getElementById("privateKey");
-            let privateKeyContainer = document.getElementById("privateKeyContainer");
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item"><strong>📦 Băm giao dịch:</strong> Tạo mã định danh duy nhất cho mỗi giao dịch.</li>
+                <li class="list-group-item"><strong>🔗 Băm khối:</strong> Liên kết các khối trong chuỗi bằng mã băm duy nhất.</li>
+                <li class="list-group-item"><strong>⚙️ Khai thác (Mining):</strong> Tạo khối mới thông qua giải toán, tạo ra nonce hợp lệ để được phần thưởng.</li>
+            </ul>
 
-            if (isPrivateKeyVisible) {
-                privateKeySpan.textContent = "********"; // Ẩn private key
-            } else {
-                privateKeySpan.textContent = actualPrivateKey; // Hiển thị private key thật
-            }
+            <p>Chữ ký số đóng vai trò xác thực người gửi và đảm bảo tính hợp lệ giao dịch. VD: Nếu A gửi cho B 1 BTC, cô ấy ký giao dịch bằng khóa cá nhân và các thợ mỏ xác minh bằng khóa công khai.</p>
 
-            privateKeyContainer.style.display = "block"; // Hiện vùng chứa private key
-            isPrivateKeyVisible = !isPrivateKeyVisible;
-        }
-
-        function copyToClipboard(elementId) {
-            let textElement = document.getElementById(elementId);
-            let textToCopy = textElement.textContent;
-
-            // Nếu là private_key và đang bị ẩn thì copy actualPrivateKey
-            if (elementId === "privateKey" && textToCopy === "********") {
-                textToCopy = actualPrivateKey;
-            }
-
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert("Copied to clipboard!");
-            }).catch(err => {
-                console.error("Failed to copy:", err);
-            });
-        }
-    </script>
+            <p class="fw-semibold">Giải pháp nhóm nghiên cứu đề xuất:</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">🔁 Thay thế SHA bằng mã băm của SPHINCS+ trong quá trình tạo & liên kết khối</li>
+                <li class="list-group-item">🛡️ Thay thế chữ ký ECDSA bằng chữ ký SPHINCS+ để bảo vệ các giao dịch</li>
+            </ul>
+        </div>
     </div>
+
+    <!-- Tổ chức bảo trợ -->
+    <div class="card shadow-lg rounded-4 border-0 mt-5">
+        <div class="card-body p-5">
+            <h3 class="mb-4 text-dark">3. Tổ chức bảo trợ</h3>
+            <p>
+                <strong>Học viện Kỹ thuật Mật mã</strong> (Vietnam Academy of Cryptography Techniques - <strong>KMA</strong>) là cơ sở giáo dục đại học công lập trực thuộc <strong>Ban Cơ yếu Chính phủ – Bộ Quốc phòng</strong>, được thành lập ngày <strong>17/02/1995</strong>.
+                có chức năng đào tạo cán bộ có trình độ đại học, sau đại học và nghiên cứu khoa học kỹ thuật mật mã của ngành Cơ yếu Việt Nam. Học viện cũng được chính phủ Việt Nam lựa chọn là một trong tám cơ sở trọng điểm đào tạo nhân lực an toàn thông tin Việt Nam theo Đề án đào tạo và phát triển nguồn nhân lực an toàn, an ninh thông tin đến năm 2025.
+            </p>
+
+            <p><strong>Sơ lược về Học viện Kỹ thuật Mật mã</strong></p>
+
+            <p>
+                Học viện Kỹ thuật Mật mã tiền thân là Trường Cán bộ Cơ yếu Trung ương (ngày 15 tháng 4 năm 1976), Trường Đại học Kỹ thuật Mật mã (ngày 5 tháng 6 năm 1985) và Viện Nghiên cứu Khoa học Kỹ thuật Mật mã (ngày 17 tháng 2 năm 1980), được thành lập ngày ngày 17 tháng 2 năm 1995 trên cơ sở sáp nhập Trường Đại học Kỹ thuật Mật mã và Viện Nghiên cứu Khoa học Kỹ thuật Mật mã.
+            </p>
+
+            <p>
+                Học viện là cơ sở duy nhất của Việt Nam có chức năng đào tạo cán bộ có trình độ đại học, sau đại học và nghiên cứu khoa học kỹ thuật mật mã của ngành Cơ yếu Việt Nam. Đây còn là nơi đào tạo và bồi dưỡng đội ngũ cán bộ cơ yếu, sĩ quan chỉ huy kỹ thuật mật mã cho quân đội Việt Nam, Lào, Campuchia và Cuba.
+            </p>
+
+            <p>
+                Hiện nay Học viện đào tạo thêm đại học chính quy hệ dân sự ngành Công nghệ thông tin (chuyên ngành An toàn thông tin, chuyên ngành Lập trình nhúng và di động) và ngành Điện tử viễn thông (chuyên ngành hệ thống nhúng và điều khiển tự động), Tiến sĩ ngành Mật mã và Thạc sĩ chuyên ngành An toàn thông tin.
+            </p>
+            <p class="mb-0">
+                <i class="fas fa-map-marker-alt me-2 text-danger"></i><strong>Địa chỉ:</strong> 141 Chiến Thắng, Tân Triều, Thanh Trì, Hà Nội<br>
+                <i class="fas fa-globe me-2 text-info"></i><strong>Website:</strong> <a href="http://actvn.edu.vn" target="_blank">http://actvn.edu.vn</a>
+            </p>
+        </div>
     </div>
-    </body>
-</html>
+
+    <!-- Đội ngũ thực hiện -->
+    <div class="card shadow-lg rounded-4 border-0 mt-5">
+        <div class="card-body p-5">
+            <h3 class="mb-4 text-dark">4. Đội ngũ thực hiện</h3>
+    <p>
+        Nhóm nghiên cứu hiện đang tập trung theo đuổi các lĩnh vực chuyên sâu bao gồm <strong>mật mã học hiện đại</strong>, <strong>công nghệ Blockchain</strong> và đặc biệt là <strong>Blockchain Layer 1</strong> – nền tảng hạ tầng cốt lõi quyết định đến hiệu suất, bảo mật và khả năng mở rộng của toàn hệ thống.
+    </p>
+    <p>
+        Không dừng lại ở đó, nhóm cũng đang từng bước mở rộng nghiên cứu sang <strong>Blockchain Layer 2</strong> – giải pháp chiến lược giúp giảm tải cho Layer 1 và nâng cao trải nghiệm người dùng thông qua khả năng xử lý giao dịch nhanh hơn, chi phí thấp hơn mà vẫn đảm bảo tính phi tập trung.
+    </p>
+    <p>
+        Với nền tảng kiến thức vững chắc từ Học viện Kỹ thuật Mật mã và tinh thần học hỏi không ngừng, nhóm hướng đến việc đóng góp những giải pháp kháng lượng tử và an toàn thông tin đột phá cho các hệ thống Blockchain tương lai.
+    </p>
+
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th scope="col">STT</th>
+                            <th scope="col">Họ và tên</th>
+                            <th scope="col">Chuyên ngành</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Vai trò</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="text-center">1</th>
+                            <td>Nguyễn Đặng Dương</td>
+                            <td>Kỹ thuật Mật mã</td>
+                            <td>dangduong020309@gmail.com</td>
+                            <td>Trưởng nhóm</td>
+                        </tr>
+                        <tr>
+                            <th class="text-center">2</th>
+                            <td>Nguyễn Thế Đức</td>
+                            <td>Kỹ thuật Mật mã</td>
+                            <td>nguyentheduc210702@gmail.com</td>
+                            <td>Thành viên</td>
+                        </tr>
+                        <tr>
+                            <th class="text-center">3</th>
+                            <td>Nguyễn Đức Duy</td>
+                            <td>Điện tử viễn thông</td>
+                            <td>nguyenduy.aiot@gmail.com</td>
+                            <td>Thành viên</td>
+                        </tr>
+                        <tr>
+                            <th class="text-center">4</th>
+                            <td>Đoàn Thanh Hải</td>
+                            <td>Kỹ thuật Mật mã</td>
+                            <td>haidoant7@gmail.com</td>
+                            <td>Thành viên</td>
+                        </tr>
+                        <tr>
+                            <th class="text-center">5</th>
+                            <td>Vũ Xuân Đạt</td>
+                            <td>Kỹ thuật Mật mã</td>
+                            <td>vuxuandat1506@gmail.com</td>
+                            <td>Thành viên</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        <p class="mt-3">
+            <strong>Giảng viên hướng dẫn:</strong> Tiến sĩ Lục Như Quỳnh – Khoa Mật mã, Học viện Kỹ thuật Mật mã.
+            <br>
+            <i class="fas fa-envelope text-danger me-2"></i><strong>Email:</strong> <a href="mailto:quynhln@actvn.edu.vn">quynhln@actvn.edu.vn</a>
+            <br>
+            <i class="fas fa-graduation-cap text-primary me-2"></i><strong>Google Scholar:</strong>
+            <a href="https://scholar.google.com/citations?user=KcFkBVIAAAAJ" target="_blank">Xem hồ sơ</a>
+        </p>
+
+        </div>
+    </div>
+
+</div>
+{% endblock information %}

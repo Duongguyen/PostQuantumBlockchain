@@ -1,41 +1,88 @@
-<!DOCTYPE html>
 {% extends 'base.html' %}
 {% load static %}
-{% block sell_coin %}
-    <form method="POST" action="{% url 'transaction' %}" class="row g-3" style="margin-left: 2%; margin-top: 2%">
+{% block transaction %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- FORM BÊN TRÁI -->
+    <div class="col-md-7 mb-4">
+      <form method="POST" action="{% url 'transaction' %}" class="row g-3">
         {% csrf_token %}
-        <div class="col-md-7">
-            <label for="inputEmail4" class="form-label">Address Wallet</label>
-            <input name="destination" type="text" class="form-control" id="inputEmail4">
+        <div class="col-md-12">
+          <label for="inputEmail4" class="form-label fw-bold">
+              <i class="fas fa-wallet me-1"></i>
+              Wallet Address
+          </label>
+          <input name="from_send" type="text" class="form-control" id="inputEmail4" placeholder="Ví người nhận">
         </div>
 
-        <div class="col-md-7">
-            <label for="inputAddress2" class="form-label">Amount</label>
-            <input name="amount" type="number" class="form-control" id="inputAddress2" placeholder="" step="any">
+        <div class="col-md-12">
+          <label for="inputEmail4" class="form-label fw-bold">
+              <i class="fas fa-coins me-1"></i>
+              Amount
+          </label>
+          <input name="amount" type="number" class="form-control" id="inputAddress2" placeholder="Số lượng" step="any">
         </div>
-        <div class="col-md-7">
-            <label for="inputAddress" class="form-label">Current Password</label>
-            <input style="width: 200px" name="pass_check" type="password" class="form-control" id="inputAddress" placeholder="">
+
+        <div class="col-md-12">
+          <label for="inputEmail4" class="form-label fw-bold">
+              <i class="fas fa-lock me-1"></i>
+              Password
+          </label>
+          <input name="pass_check" type="password" class="form-control" id="inputAddress" placeholder="Nhập mật khẩu">
         </div>
+
         {{ form.captcha }}
         {% for error in form.captcha.errors %}
-
-        <p>{{ error }}</p>
+          <p class="text-danger">{{ error }}</p>
         {% endfor %}
 
-        <div class="g-recaptcha" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
+        <div class="g-recaptcha mt-2" data-sitekey="6LdCS4QqAAAAAM7zEz1nPyTmoRPDKXdo5NIn8Dro"></div>
 
         <div class="col-12">
-            <button type="submit" class="btn btn-primary">Sell</button>
+          <button type="submit" class="btn btn-primary w-100 mt-2"><i class="fas fa-paper-plane me-1"></i>Sell</button>
         </div>
 
         {% if messages %}
-            <div class="col-md-7">
-                <div class="alert alert-success text-center mt-4">
-                    <i class="fas fa-check-circle"></i> {{ messages }}
-                </div>
-            </div>
+        <div class="col-md-12">
+          <div class="alert alert-success text-center mt-4">
+            <i class="fas fa-check-circle"></i> {{ messages }}
+          </div>
+        </div>
         {% endif %}
+      </form>
+    </div>
 
-    </form>
-{% endblock sell_coin %}
+    <!-- HƯỚNG DẪN BÊN PHẢI -->
+    <div class="col-md-5">
+      <div class="card shadow-sm" style="background-color: rgba(248, 249, 250, 0.85); border-radius: 10px;">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fas fa-info-circle me-2 text-primary"></i>Hướng dẫn giao dịch</h5>
+          <p><strong>2. Tính năng giao dịch đồng tiền mã hóa</strong></p>
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-sign-in-alt text-success me-2"></i><strong>Bước 1:</strong> Đăng nhập tài khoản</li>
+            <li class="mb-2"><i class="fas fa-list text-info me-2"></i><strong>Bước 2:</strong> Chọn tính năng “Sell Crypto” bên trái (khối <strong>FEATURES</strong>)</li>
+            <li class="mb-2"><i class="fas fa-edit text-warning me-2"></i><strong>Bước 3:</strong> Nhập các thông tin:
+              <ul>
+                <li>Địa chỉ ví người nhận</li>
+                <li>Số lượng tiền mã hóa</li>
+                <li>Mật khẩu tài khoản</li>
+                <li>Xác minh reCAPTCHA</li>
+              </ul>
+            </li>
+
+            <li class="mb-2"><i class="fas fa-envelope-open-text text-danger me-2"></i><strong>Bước 4:</strong> Nhập mã OTP gửi qua email</li>
+            <li class="mb-2"><i class="fas fa-check-double text-success me-2"></i><strong>Bước 5:</strong> Nhập đúng mã OTP → <strong>Giao dịch hoàn tất</strong></li>
+          </ul>
+
+          <!-- Hình minh họa -->
+          <div class="text-center mt-3">
+            <img src="{% static 'images/thực hiện giao dịch.png' %}" class="img-fluid rounded shadow" alt="Hình 4: Thực hiện giao dịch">
+            <p class="text-muted mt-2">Hình 1: Thực hiện giao dịch</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock transaction %}

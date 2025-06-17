@@ -1,10 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block mine_success %}
-<div class="image">
-    <img src="{% static 'images/7504.png' %}" class="img-logo" style="margin-left: 700px; margin-top: 100px; width: 25%;">
-    <p style="margin-left: 635px; margin-top: 50px; font-size: 22px;"><b>Bạn đã đào thành công phần thưởng của bạn là 1 BTC<span>&#x1F44B</span></b></p>
+<div class="container text-center" style="margin-top: 8%; animation: fadeInUp 1s ease-in-out;">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 600px; border-radius: 20px;">
+        <div class="card-body">
+            <img src="{% static 'images/7504.png' %}" alt="Success" class="img-fluid" style="width: 200px; margin-bottom: 20px;">
+            <h2 class="text-success fw-bold mb-3"><i class="fas fa-coins me-2"></i>Đào tiền thành công!</h2>
+            <p class="lead mb-4">Chúc mừng bạn đã hoàn tất quá trình đào tiền mã hóa!</p>
+            <p style="font-size: 18px;"><strong>Phần thưởng của bạn:</strong> <span class="text-warning fw-bold" style="font-size: 22px;">1 BTC 💰</span></p>
+            <a href="{% url 'homepage' %}" class="btn btn-outline-primary mt-4"><i class="fas fa-arrow-left me-2"></i>Quay về trang chủ</a>
+        </div>
+    </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-<script src="{% static 'js/scripts.js' %}"></script>
+
+<!-- Animation -->
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
 {% endblock mine_success %}
