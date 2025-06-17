@@ -59,6 +59,10 @@ def guide(request):
     if request.user.is_authenticated and request.user.username != 'admin':
         return render(request, 'guide.html')
 
+def solutions_view(request):
+    if request.user.is_authenticated and request.user.username != 'admin':
+        return render(request, 'solutions.html')
+
 
 def base(request):
     if request.user.is_authenticated and request.user.username != 'admin':

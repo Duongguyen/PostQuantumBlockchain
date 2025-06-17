@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block solutions %}
+<div class="container mt-5 p-4 rounded shadow-lg bg-white border border-1" style="line-height: 1.6;">
+    <h1 class="text-center mb-4 animate__animated animate__fadeInDown">
+        <i class="fas fa-lightbulb text-warning me-2"></i> Giải pháp Thiết kế
+    </h1>
+
+    <!-- Mục 1.1 -->
+    <div class="mb-4 animate__animated animate__fadeInUp">
+        <h4 class="mb-2"><i class="fas fa-link text-success me-2"></i>1.1. Tích hợp hàm băm SPHINCS+ trong Blockchain</h4>
+        <p>
+            Như trong Hình 1, nhóm nghiên cứu sử dụng hàm băm <strong>SPHINCS+-SHAKE256</strong> để tạo mã băm cho khối và dùng mã băm liên kết các khối lại với nhau.
+        </p>
+        <div class="text-center mt-3">
+            <img src="{% static 'images/tạo khối cho Bảng.png' %}" class="img-fluid rounded shadow" style="max-width: 90%;" alt="Hình 1: Sử dụng hàm băm trong Bảng">
+            <p class="text-muted mt-2 small">Hình 1: Sử dụng hàm băm trong Bảng</p>
+        </div>
+    </div>
+
+    <!-- Mục 1.2 -->
+    <div class="mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+        <h4 class="mb-2"><i class="fas fa-shield-alt text-primary me-2"></i>1.2. Tích hợp chữ ký số dựa trên SPHINCS+-SHAKE256</h4>
+        <p><strong>Định nghĩa 1:</strong> <em>PQB</em> là công nghệ blockchain an toàn kết hợp mật mã hậu lượng tử và công nghệ blockchain với nhau. Điều này có nghĩa là PQB không chỉ có những ưu điểm của blockchain mà còn có thể chống lại các cuộc tấn công của máy tính lượng tử một cách hiệu quả. Chúng tôi cho rằng PQB phải đáp ứng bốn điều kiện sau.
+</p>
+        <ul class="ps-3">
+            <li><i class="fas fa-check-circle text-success me-1"></i>Kết hợp mật mã hậu lượng tử và blockchain</li>
+            <li><i class="fas fa-check-circle text-success me-1"></i>Chống lại tấn công cổ điển</li>
+            <li><i class="fas fa-check-circle text-success me-1"></i>Chống lại Shor, Grover</li>
+            <li><i class="fas fa-check-circle text-success me-1"></i>Chữ ký có thể theo dõi/liên kết</li>
+        </ul>
+        <p class="fst-italic mt-2 mb-3">→ Vì vậy việc tích hợp chữ ký số dựa trên hàm băm SPHINCS⁺ cho đồng tiền ảo dựa trên công nghệ blockchain là hoàn toàn khả thi.
+</p>
+        <div class="text-center">
+            <img src="{% static 'images/Giao dịch Bitcoin.png' %}" class="img-fluid rounded shadow" style="max-width: 90%;" alt="Hình 2: Giao dịch của bitcoin">
+            <p class="text-muted mt-2 small">Hình 2: Giao dịch của bitcoin dựa trên công nghệ Blockchain</p>
+        </div>
+        <p class="mt-3">
+            Trong Hình 2 là quy trình ký số của Bitcoin dựa trên Blockchain, nhóm học viên cũng chọn quy trình ký số của Bitcoin làm quy trình cho việc tạo chữ ký cho các giao dịch trong ứng dụng tuy nhiên thay vì sử dụng ECC nhóm học viên sử dụng SPHINCS⁺.
+        </p>
+    </div>
+
+    <!-- Mục 1.3 -->
+    <div class="mb-4 animate__animated animate__fadeInUp animate__delay-2s">
+        <h4 class="mb-2"><i class="fas fa-diagram-project text-info me-2"></i>1.3. Lưu đồ tạo và kiểm tra chữ ký</h4>
+        <div class="text-center">
+            <img src="{% static 'images/kiểm tra sig.png' %}" class="img-fluid rounded shadow" style="max-width: 90%;" alt="Hình 3: Lưu đồ tạo và kiểm tra chữ ký">
+            <p class="text-muted mt-2 small">Hình 3: Lưu đồ tạo và kiểm tra chữ ký cho giao dịch</p>
+        </div>
+    </div>
+
+    <!-- Mục 1.4 -->
+    <div class="mb-2 animate__animated animate__fadeInUp animate__delay-3s">
+        <h4 class="mb-2"><i class="fas fa-network-wired text-secondary me-2"></i>1.4. Mô hình hạ tầng kết nối</h4>
+        <div class="text-center">
+            <img src="{% static 'images/mô hình hạ tầng connect.png' %}" class="img-fluid rounded shadow" style="max-width: 90%;" alt="Hình 4: Mô hình hạ tầng kết nối">
+            <p class="text-muted mt-2 small">Hình 4: Mô hình hạ tầng kết nối</p>
+        </div>
+        <ul class="ps-3 mt-3">
+            <li><i class="fas fa-server me-2 text-dark"></i>Database nội bộ: <strong>X.X.X.2</strong></li>
+            <li><i class="fas fa-globe me-2 text-dark"></i>Web server: <strong>X.X.X.1</strong>, nội bộ: <strong>X.X.X.135</strong></li>
+            <li><i class="fas fa-lock me-2 text-dark"></i>Firewall chỉ mở cổng: <strong>443</strong></li>
+            <li><i class="fas fa-map-marker-alt me-2 text-dark"></i>IP Public: <strong>118.70.128.29</strong></li>
+            <li><i class="fas fa-link me-2 text-dark"></i>Website: <a href="https://www.post-quantum-coin.online" target="_blank">https://www.post-quantum-coin.online</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock solutions %}
