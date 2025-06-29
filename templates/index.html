@@ -2,54 +2,55 @@
 {% load static %}
 {% block content %}
 <div class="container-fluid">
-  <div class="row">
+  <div class="row vh-100 d-flex align-items-center">
     <!-- Cột bên trái: tiêu đề -->
-    <div class="col-md-6 vh-100" style="margin-top: 3%; margin-left: 5%;">
-        <div id="main-title" class="text-center my-5" style="padding: 5%; word-wrap: break-word; word-break: break-word; white-space: normal;">
+    <div class="col-md-6 ps-5">
+        <div id="main-title" class="text-center my-5" style="padding: 3%;">
             {% for title in title_list %}
-            <h1 class="fw-bold title-item"
-                style="font-size: 5.5rem; font-family: 'Poppins', sans-serif;">
-                <span class="form-label fw-bold" style="color: #222222;">{{ title.split_title.0 }}</span><br>
-                <span class="form-label fw-bold" style="color: #FFFF00;">{{ title.split_title.1 }}</span>
+            <h1 class="fw-bold title-item mb-4" style="font-size: 4.5rem; font-family: 'Poppins', sans-serif; line-height: 1.2;">
+                <span class="text-dark">{{ title.split_title.0 }}</span><br>
+                <span class="text-warning">{{ title.split_title.1 }}</span>
             </h1>
-              <a href="{{ title.link }}"
-                 class="btn mt-3"
-                 style="width: 50%; height: 3%; font-size: 1.5rem; font-family: 'Times New Roman', Times, serif; background-color: black; color: yellow; text-align: center; line-height: 1.2cm; display: inline-block; text-decoration: none; border-radius: 5px;">
-                  Bắt đầu ngay
-              </a>
+            <a href="{{ title.link }}"
+               class="btn btn-custom-start"
+               style="width: 60%; font-size: 1.4rem;">
+                🚀 Bắt đầu ngay
+            </a>
             {% endfor %}
         </div>
     </div>
 
     <!-- Cột bên phải: Popular và Tin tức -->
-    <div class="col-md-6">
-      <div class="position-fixed" style="top: 50%; right: 5%; transform: translateY(-50%); width: 30%;">
+    <div class="col-md-6 pe-5">
+      <div class="position-relative" style="top: 0; right: 0; width: 100%; max-width: 500px; margin-left: auto;">
+
         <!-- Popular Section -->
-        <div id="crypto-prices" class="card mb-4">
-          <div class="card-header d-flex align-items-center">
-            <h5 class="mb-0 text-start" style="width: 100%; font-weight: bold;">Popular</h5>
+        <div id="crypto-prices" class="card shadow mb-4 border-0 rounded-4">
+          <div class="card-header bg-light rounded-top-4">
+            <h5 class="mb-0 fw-semibold text-dark">🔥 Popular</h5>
           </div>
           <div class="card-body">
-            <ul id="coin-list" class="list-group">
+            <ul id="coin-list" class="list-group list-group-flush">
               <!-- Nội dung coin -->
+              <li class="list-group-item">Bitcoin (BTC): $60,000</li>
+              <li class="list-group-item">Ethereum (ETH): $3,000</li>
+              <li class="list-group-item">Solana (SOL): $150</li>
             </ul>
           </div>
         </div>
 
         <!-- News Section -->
-        <div id="news-section" class="card">
-          <div class="card-header">
-            <h5>News</h5>
+        <div id="news-section" class="card shadow border-0 rounded-4">
+          <div class="card-header bg-light rounded-top-4">
+            <h5 class="fw-semibold text-dark">📰 News</h5>
           </div>
           <div class="card-body">
-            <ul class="list-group">
+            <ul class="list-group list-group-flush">
               {% for news in news_list %}
                 <li class="list-group-item">
-                  <p>
-                    <a href="{% url 'news_detail' news.id %}" class="text-decoration-none">
-                      {{ news.summary }}
-                    </a>
-                  </p>
+                  <a href="{{ news.content }}" class="text-decoration-none text-primary">
+                    {{ news.summary }}
+                  </a>
                 </li>
               {% endfor %}
             </ul>
@@ -62,41 +63,54 @@
 
 <!-- Inline Style -->
 <style>
-  .card-header h5 {
-    margin: 0;
-    text-align: left; /* Đẩy chữ "Popular" về góc trái */
-    color: #333; /* Tùy chỉnh màu chữ */
-  }
-
-  /* Tùy chỉnh các tiêu đề trong giao diện */
   .title-item {
-    font-size: 4rem;
-    color: #000;
+    word-break: break-word;
   }
 
-  .btn {
-    font-weight: bold;
+  .btn-custom-start {
+    background: linear-gradient(to right, #000000, #434343);
+    color: #FFD700;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-custom-start:hover {
+    background: linear-gradient(to right, #434343, #000000);
+    color: #ffffff;
+  }
+
+  .card {
+    background-color: #fff;
+    border-radius: 1rem;
+  }
+
+  .card-header {
+    font-size: 1.2rem;
+  }
+
+  .list-group-item {
+    font-size: 1rem;
     border: none;
+    padding: 0.75rem 1rem;
   }
 
-  #coin-list, .list-group {
-    list-style-type: none;
-    padding: 0;
+  .list-group-item a:hover {
+    text-decoration: underline;
   }
 
-  #crypto-prices .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+  @media (max-width: 768px) {
+    .col-md-6 {
+      width: 100%;
+    }
+
+    #main-title h1 {
+      font-size: 3rem !important;
+    }
+
+    .btn-custom-start {
+      width: 100% !important;
+    }
   }
 </style>
-
-<script>
-  document.querySelectorAll('.title-item').forEach(function (title) {
-    const words = title.dataset.title.split(' '); // Lấy nội dung tiêu đề
-    for (let i = 3; i < words.length; i += 4) {
-      words[i] = '<br>' + words[i]; // Thêm <br> sau mỗi 3 từ
-    }
-    title.innerHTML = words.join(' '); // Cập nhật nội dung
-  });
-</script>
 {% endblock content %}
